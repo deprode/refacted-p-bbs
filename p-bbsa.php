@@ -30,7 +30,8 @@ if (phpversion()>="4.1.0") {
  */
 
 // *ereg系を使っているのでpreg系に直した方がいい
-// *$_GETと$_POSTに来るのは、mode,page,pno,noの4つなので、これらをValidationした方がいい
+// *$_GETに来るのは、mode,page,pno,noなので、これらをValidationした方がいい
+// *$_POSTに来るのは、mode,name,email,sub,com,url,password,no,pwd,apass,del[]なので、これらをValidationした方がいい
 // *extract使わないで、$_REQUESTから適切なローカル変数に代入した方がいい
 // *テンプレート組み立て部分はヒアドキュメント使った方が読みやすい
 // *調べたところ、大手レンタルサーバーはロリポップ以外は5.5以上に設定できるの
