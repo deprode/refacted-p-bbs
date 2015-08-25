@@ -29,7 +29,6 @@ if (phpversion()>="4.1.0") {
  * HTMLを書き出す場合は、そのディレクトリが707か777じゃないとダメです
  */
 
-// *ereg系を使っているのでpreg系に直した方がいい
 // *$_GETに来るのは、mode,page,pno,noなので、これらをValidationした方がいい
 // *$_POSTに来るのは、mode,name,email,sub,com,url,password,no,pwd,apass,del[]なので、これらをValidationした方がいい
 // *extract使わないで、$_REQUESTから適切なローカル変数に代入した方がいい
@@ -156,16 +155,16 @@ function head(&$dat) { 		//ヘッダー表示部
 
     if($flag == 0) error("該当記事が見つかりません");
 
-    if(ereg("Re\[([0-9]+)\]:", $sub, $reg)) {
+    if(preg_match("/Re\[([0-9]+)\]:/", $sub, $reg)) {
       $reg[1]++;
-      $r_sub=ereg_replace("Re\[([0-9]+)\]:", "Re[$reg[1]]:", $sub);
-    } elseif (ereg("^Re:", $sub)) {
-      $r_sub=ereg_replace("^Re:", "Re[2]:", $sub);
+      $r_sub=preg_replace("/Re\[([0-9]+)\]:/", "Re[$reg[1]]:", $sub);
+    } elseif (preg_match("/^Re:/", $sub)) {
+      $r_sub=preg_replace("/^Re:/", "Re[2]:", $sub);
     } else {
       $r_sub = "Re:$sub";
     }
     $r_com = "&gt;$com";
-    $r_com = eregi_replace("<br( /)?>","\r&gt;",$r_com);
+    $r_com = preg_replace("/<br( \/)?>/","\r&gt;",$r_com);
   }
 
 $head = <<<HEAD
@@ -230,7 +229,7 @@ function Main(&$dat){	//記事表示部
     if($url){ $url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";}
     if($email){ $name = "<a href=\"mailto:$email\">$name</a>";}
     // ＞がある時は色変更
-    $com = eregi_replace("(^|>)(&gt;[^<]*)", "\\1<font color=$re_color>\\2</font>", $com);
+    $com = preg_replace("/(^|>)(&gt;[^<]*)/i", "\\1<font color=$re_color>\\2</font>", $com);
     // URL自動リンク
     if ($autolink) { $com=auto_link($com); }
     // Host表示形式
@@ -272,11 +271,11 @@ function regist(){	//ログ書き込み
 
   if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) error("禁止ワードエラー！！");
   if($REQUEST_METHOD != "POST") error("不正な投稿をしないで下さい");
-  if(GAIBU && !eregi($PHP_SELF,getenv("HTTP_REFERER"))) error("外部から書き込みできません");
+  if(GAIBU && !preg_match("/".$PHP_SELF."/i", getenv("HTTP_REFERER"))) error("外部から書き込みできません");
   // フォーム内容をチェック
-  if(!$name||ereg("^( |　)*$",$name)){ error("名前が書き込まれていません"); }
-  if(!$com||ereg("^( |　|\t|\r|\n)*$",$com)){ error("本文が書き込まれていません"); }
-  if(!$sub||ereg("^( |　)*$",$sub)){ $sub=$mudai; }
+  if(!$name||preg_match("/^( |　)*$/",$name)){ error("名前が書き込まれていません"); }
+  if(!$com||preg_match("/^( |　|\t|\r|\n)*$/",$com)){ error("本文が書き込まれていません"); }
+  if(!$sub||preg_match("/^( |　)*$/",$sub)){ $sub=$mudai; }
 
   if(strlen($name) > $maxn){ error("名前が長すぎますっ！"); }
   if(strlen($sub) > $maxs){ error("タイトルが長すぎますっ！"); }
@@ -316,7 +315,7 @@ function regist(){	//ログ書き込み
   if ($password) { $PW = crypt(($password),aa); }
 
   $now = gmdate( "Y/m/d(D) H:i",time()+9*60*60);
-  $url = ereg_replace( "^http://",  "",$url);
+  $url = preg_replace( "/^http:\/\//",  "",$url);
 
   if (get_magic_quotes_gpc()) {//\を削除
     $com = stripslashes($com);
@@ -342,9 +341,9 @@ function regist(){	//ログ書き込み
   $str_cnt=strlen($temp)-strlen($com);
   if($str_cnt > $maxline){ error("行数が長すぎますっ！"); }
 
-  $com = ereg_replace("\n((　| |\t)*\n){3,}","\n",$com);//連続する空行を一行
+  $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com);//連続する空行を一行
   $com = nl2br($com);  //改行文字の前に<br>を代入する。
-  $com = ereg_replace( "\n",  "", $com);  //\nを文字列から消す。
+  $com = preg_replace("/\n/", "", $com);  //\nを文字列から消す。
 
   $new_msg="$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$times\n";
 
@@ -548,7 +547,7 @@ function past_log($data){//過去ログ作成
   if($purl){ $purl = "<a href=\"http://$purl\" target=\"_blank\">HP</a>";}
   if($pemail){ $pname = "<a href=\"mailto:$pemail\">$pname</a>";}
   // ＞がある時は色変更
-  $pcom = eregi_replace("(&gt;)([^<]*)", "<font color=999999>\\1\\2</font>", $pcom);
+  $pcom = preg_replace("/(&gt;)([^<]*)/i", "<font color=999999>\\1\\2</font>", $pcom);
   // URL自動リンク
   if ($autolink) { $pcom=auto_link($pcom); }
 
@@ -592,7 +591,7 @@ function past_view(){
 }
 
 function auto_link($proto){//自動リンク5/25修正
-  $proto = ereg_replace("(https?|ftp|news)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)","<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>",$proto);
+  $proto = preg_replace("/(https?|ftp|news)(:\/\/[[A-Za-z0-9]\+\$\;\?\.%,!#~*\/:@&=_-]+)/","<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>",$proto);
   return $proto;
 }
 
