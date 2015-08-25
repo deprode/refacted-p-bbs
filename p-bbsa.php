@@ -715,7 +715,7 @@ switch ($mode) {
         }
 
         // *転送
-        echo "<META HTTP-EQUIV=\"refresh\" content=\"0;URL=$PHP_SELF?\">";
+        header("Location: $PHP_SELF");
         break;
     case 'admin':
         // *管理
