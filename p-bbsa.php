@@ -121,7 +121,7 @@ $mode = (isset($mode)) ? $mode : '';
 // 禁止ホスト
 if (is_array($no_host)) {
     // IPアドレスをホスト名にしてホストをはじいている
-    $host = gethostbyaddr(getenv("REMOTE_ADDR"));
+    $host = gethostbyaddr($_SERVER['REMOTE_ADDR']);
     foreach ($no_host as $user) {
         if (preg_match("/$user/i", $host)) {
             header("Status: 204\n\n"); //空白ページ
@@ -350,7 +350,7 @@ function regist()
 
     // ホスト名を取得
     $host = getenv("REMOTE_HOST");
-    $addr = getenv("REMOTE_ADDR");
+    $addr = $_SERVER['REMOTE_ADDR'];
     if ($host == "" || $host == $addr) {
         //gethostbyddrが使えるか
         $host = @gethostbyaddr($addr);
