@@ -169,7 +169,7 @@ function head(&$dat) { 		//ヘッダー表示部
   }
 
   $head='<html><head>
-<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=Shift_JIS">
+<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
 <title>'.$title1.'</title>
 </head>';
 
@@ -595,7 +595,7 @@ function error($mes){	//エラーフォーマット
   global $body;
 	?>
 <html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=x-sjis"></head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
 <? echo $body; ?>
 <br><br><hr size=1><br><br>
 <center><font color=red size=5><b><? echo $mes; ?></b></font></center>
