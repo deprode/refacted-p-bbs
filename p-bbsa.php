@@ -312,7 +312,9 @@ function regist(){	//ログ書き込み
   }
 
   // 削除キーを暗号化
-  if ($password) { $PW = crypt(($password),aa); }
+  if ($password) {
+    $PW = password_hash($password, PASSWORD_DEFAULT);
+  }
 
   $now = gmdate( "Y/m/d(D) H:i",time()+9*60*60);
   $url = preg_replace( "/^http:\/\//",  "",$url);
@@ -385,7 +387,7 @@ function usrdel(){	//ユーザー削除
   if ($pass == "") { error("該当記事には削除キーが設定されていません"); }
 
   // 削除キーを照合
-  $match = crypt(($pwd),aa);
+  $match = password_verify($pwd, $pass);
   if (($match != $pass)) { error("削除キーが違います"); }
 
   // ログを更新
