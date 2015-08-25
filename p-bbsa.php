@@ -168,42 +168,47 @@ function head(&$dat) { 		//ヘッダー表示部
     $r_com = eregi_replace("<br( /)?>","\r&gt;",$r_com);
   }
 
-  $head='<html><head>
+$head = <<<HEAD
+<html><head>
 <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
-<title>'.$title1.'</title>
-</head>';
+<title>$title1</title>
+</head>
+HEAD;
 
-$dat=$head.$body.'
-<form method="POST" action="'.$PHP_SELF.'">
+$dat = $head.$body;
+$dat .= <<<DAT
+<form method="POST" action="$PHP_SELF">
 <input type="hidden" name="mode" value="regist">
-<BASEFONT SIZE="3">'.$title2.'<hr size=1><br>
+<BASEFONT SIZE="3">$title2<hr size=1><br>
 <TT>
-お名前 <input type=text name="name" size=20 value="'.$r_name.'" maxlength=24><br>
-メール <input type=text name="email" size=30 value="'.$r_mail.'"><br>
-題名　 <input type=text name="sub" size=30 value="'.$r_sub.'">
+お名前 <input type=text name="name" size=20 value="$r_name" maxlength=24><br>
+メール <input type=text name="email" size=30 value="$r_mail"><br>
+題名　 <input type=text name="sub" size=30 value="$r_sub">
 <input type=submit value="     投稿     "><input type=reset value="消す"><br>
-<textarea name="com" rows=5 cols=82>'.$r_com.'</textarea><br><br>
+<textarea name="com" rows=5 cols=82>$r_com</textarea><br><br>
 ＵＲＬ　 <input type=text name="url" size=70 value="http://"><br>
-削除キー <input type=password name="password" size=8 value="'.$r_pass.'">(記事の削除用。英数字で8文字以内)
+削除キー <input type=password name="password" size=8 value="$r_pass">(記事の削除用。英数字で8文字以内)
 </form></TT>
-<hr size=1><font size=-2>新しい記事から表示します。最高'.$max.'件の記事が記録され、それを超えると古い記事から過去ログへ移ります。<br>
- １回の表示で'.$page_def.'件を越える場合は、下のボタンを押すことで次の画面の記事を表示します。</font>
-';
+<hr size=1><font size=-2>新しい記事から表示します。最高{$max}件の記事が記録され、それを超えると古い記事から過去ログへ移ります。<br>
+ １回の表示で{$page_def}件を越える場合は、下のボタンを押すことで次の画面の記事を表示します。</font>
+DAT;
+
 }
 
 function foot(&$dat){ //フッター表示部
   global $PHP_SELF,$home,$past_key;
 
-$dat.='<div align="right"><form method="POST" action="'.$PHP_SELF.'">
+$past_log = ($past_key) ? '[ <a href='.$PHP_SELF.'?mode=past>過去ログ</a> ]' : '';
+
+$dat .= <<<DAT
+<div align="right"><form method="POST" action="$PHP_SELF">
 <input type=hidden name=mode value="usrdel">No <input type=text name=no size=2>
 pass <input type=password name=pwd size=4 maxlength=8>
 <input type=submit value="Del"></form>
-[ <a href='.$home.'>ホーム</a> ] [ <a href='.$PHP_SELF.'?mode=admin>管理</a> ] ';
-
-if($past_key) $dat.='[ <a href='.$PHP_SELF.'?mode=past>過去ログ</a> ]';
-
-$dat.='<br><br><small><!-- P-BBS v1.232 -->- <a href="http://php.s3.to" target="_top">P-BBS</a> -</small></div>
-</body></html>';
+[ <a href=$home>ホーム</a> ] [ <a href=$PHP_SELF?mode=admin>管理</a> ] $past_log
+<br><br><small><!-- P-BBS v1.232 -->- <a href="http://php.s3.to" target="_top">P-BBS</a> -</small></div>
+</body></html>
+DAT;
 }
 
 function Main(&$dat){	//記事表示部
@@ -611,7 +616,7 @@ function error($mes){	//エラーフォーマット
 switch($mode):
 	case 'regist':
     // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
-  require_once("../rbl.php");
+  require_once("./rbl.php");
   if (check_spam()) die("梅干たべてすっぱぃまん！！");
   // *ログ書き込み
 		regist();
