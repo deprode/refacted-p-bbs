@@ -387,7 +387,15 @@ function regist()
         $url = stripslashes($url);
     }
 
-    $com = str_replace("\r\n", "\r", $com); //改行文字の統一。
+    // ログの区切り文字である<>を参照文字に置換
+    $com = str_replace("<>", "&lt;&gt;", $com);
+    $sub = str_replace("<>", "&lt;&gt;", $sub);
+    $name = str_replace("<>", "&lt;&gt;", $name);
+    $email = str_replace("<>", "&lt;&gt;", $email);
+    $url = str_replace("<>", "&lt;&gt;", $url);
+
+    //改行文字の統一。
+    $com = str_replace("\r\n", "\r", $com);
     $com = str_replace("\r", "\n", $com);
     /* \n数える（substr_countの代わり）*/
     $temp = str_replace("\n", "\n" . "a", $com);
