@@ -26,7 +26,7 @@ class Validation
 
     }
 
-    public function e($string)
+    public function h($string)
     {
         return htmlspecialchars($string, ENT_QUOTES, "UTF-8");
     }

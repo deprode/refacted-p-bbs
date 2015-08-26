@@ -241,12 +241,12 @@ function Main(&$dat)
             $host, $pw) = explode("<>", $view[$s]);
 
         if ($tag == 0) {
-            $sub = $validation->e($sub); //タグっ禁止
-            $name = $validation->e($name);
-            $email = $validation->e($email);
-            $url = $validation->e($url);
+            $sub = $validation->h($sub); //タグっ禁止
+            $name = $validation->h($name);
+            $email = $validation->h($email);
+            $url = $validation->h($url);
             $com = br2nl($com);
-            $com = $validation->e($com);
+            $com = $validation->h($com);
             $com = str_replace("&amp;", "&", $com);
             $com = nl2br($com);
         }
