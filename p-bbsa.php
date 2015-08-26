@@ -1,4 +1,7 @@
 <?php
+
+require_once 'validation.php';
+
 // extractを使って、スーパーグローバルをパース、$hogeでとれるようにしてる
 if (phpversion() >= "4.1.0") {
     extract($_REQUEST);
@@ -228,7 +231,9 @@ DAT;
 function Main(&$dat)
 {
     //記事表示部
-    global $logfile, $page_def, $page, $PHP_SELF, $autolink, $re_color, $hostview;
+    global $logfile, $page_def, $page, $PHP_SELF, $autolink, $re_color, $hostview, $tag;
+
+    $validation = new Validation();
 
     $view = file($logfile);
     $total = sizeof($view);
@@ -246,6 +251,15 @@ function Main(&$dat)
 
         list($no, $now, $name, $email, $sub, $com, $url,
             $host, $pw) = explode("<>", $view[$s]);
+
+        if ($tag == 0) {
+            $sub = $validation->e($sub); //タグっ禁止
+            $name = $validation->e($name);
+            $com = $validation->e($com);
+            $email = $validation->e($email);
+            $url = $validation->e($url);
+            $com = str_replace("&amp;", "&", $com);
+        }
 
         if ($url) {$url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";}
         if ($email) {$name = "<a href=\"mailto:$email\">$name</a>";}
@@ -371,15 +385,6 @@ function regist()
         $name = stripslashes($name);
         $email = stripslashes($email);
         $url = stripslashes($url);
-    }
-
-    if ($tag == 0) {
-        $sub = htmlspecialchars($sub); //タグっ禁止
-        $name = htmlspecialchars($name);
-        $com = htmlspecialchars($com);
-        $email = htmlspecialchars($email);
-        $url = htmlspecialchars($url);
-        $com = str_replace("&amp;", "&", $com);
     }
 
     $com = str_replace("\r\n", "\r", $com); //改行文字の統一。
