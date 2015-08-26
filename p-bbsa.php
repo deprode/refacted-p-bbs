@@ -140,7 +140,7 @@ if (is_array($no_host)) {
 function head(&$dat)
 {
     //ヘッダー表示部
-    global $mode, $no, $PHP_SELF, $logfile, $title1, $title2, $body, $p_bbs, $htmlw, $max, $page_def;
+    global $mode, $no, $logfile, $title1, $title2, $body, $p_bbs, $htmlw, $max, $page_def;
     $r_name = $r_mail = null;
     $r_sub = $r_com = $r_pass = null;
 
@@ -192,7 +192,7 @@ HEAD;
 
     $dat = $head . $body;
     $dat .= <<<DAT
-<form method="POST" action="$PHP_SELF">
+<form method="POST" action="{$_SERVER['SCRIPT_NAME']}">
 <input type="hidden" name="mode" value="regist">
 <BASEFONT SIZE="3">$title2<hr size=1><br>
 <TT>
@@ -213,16 +213,16 @@ DAT;
 function foot(&$dat)
 {
     //フッター表示部
-    global $PHP_SELF, $home, $past_key;
+    global $home, $past_key;
 
-    $past_log = ($past_key) ? '[ <a href=' . $PHP_SELF . '?mode=past>過去ログ</a> ]' : '';
+    $past_log = ($past_key) ? '[ <a href=' . $_SERVER['SCRIPT_NAME'] . '?mode=past>過去ログ</a> ]' : '';
 
     $dat .= <<<DAT
-<div align="right"><form method="POST" action="$PHP_SELF">
+<div align="right"><form method="POST" action="{$_SERVER['SCRIPT_NAME']}">
 <input type=hidden name=mode value="usrdel">No <input type=text name=no size=2>
 pass <input type=password name=pwd size=4 maxlength=8>
 <input type=submit value="Del"></form>
-[ <a href=$home>ホーム</a> ] [ <a href=$PHP_SELF?mode=admin>管理</a> ] $past_log
+[ <a href=$home>ホーム</a> ] [ <a href={$_SERVER['SCRIPT_NAME']}?mode=admin>管理</a> ] $past_log
 <br><br><small><!-- P-BBS v1.232 -->- <a href="http://php.s3.to" target="_top">P-BBS</a> -</small></div>
 </body></html>
 DAT;
@@ -231,7 +231,7 @@ DAT;
 function Main(&$dat)
 {
     //記事表示部
-    global $logfile, $page_def, $page, $PHP_SELF, $autolink, $re_color, $hostview, $tag;
+    global $logfile, $page_def, $page, $autolink, $re_color, $hostview, $tag;
 
     $validation = new Validation();
 
@@ -272,7 +272,7 @@ function Main(&$dat)
         // Host表示形式
         if ($hostview == 1) {$host = "<!--$host-->";} elseif ($hostview == 2) {$host = "[ $host ]";} else { $host = "";}
 
-        $dat .= '<hr size=1>[<a href="' . $PHP_SELF . '?mode=resmsg&no=' . $no . '">' . $no . '</a>] ';
+        $dat .= '<hr size=1>[<a href="' . $_SERVER['SCRIPT_NAME'] . '?mode=resmsg&no=' . $no . '">' . $no . '</a>] ';
         $dat .= '<font size="+1" color="#D01166"><b>' . $sub . '</b></font><br>';
         $dat .= '　Name：<font color="#007000"><b>' . $name . '</b></font><font size="-1">　Date： ' . $now . '</font>';
         $dat .= '<p><blockquote><tt>' . $com . '<br></tt>';
@@ -284,20 +284,20 @@ function Main(&$dat)
     $prev = $page - $page_def;
     $next = $page + $page_def;
     $dat .= sprintf("<hr size=1> %d 番目から %d 番目の記事を表示<br><center>Page:[<b> ", $st, $st + $p - 1);
-    ($page > 0) ? $dat .= "<a href=\"$PHP_SELF?page=$prev\">&lt;&lt;</a> " : $dat .= " ";
+    ($page > 0) ? $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$prev\">&lt;&lt;</a> " : $dat .= " ";
     $p_no = 1;
     $p_li = 0;
 
     while ($total > 0) {
         if ($page == $p_li) {
             $dat .= "$p_no ";
-        } else { $dat .= "<a href=\"$PHP_SELF?page=$p_li\">$p_no</a> ";}
+        } else { $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$p_li\">$p_no</a> ";}
         $p_no++;
         $p_li = $p_li + $page_def;
         $total = $total - $page_def;
     }
 
-    ($total2 > $next) ? $dat .= " <a href=\"$PHP_SELF?page=$next\">&gt;&gt;</a>" : $dat .= " ";
+    ($total2 > $next) ? $dat .= " <a href=\"{$_SERVER['SCRIPT_NAME']}?page=$next\">&gt;&gt;</a>" : $dat .= " ";
     $dat .= "</b> ]\n";
 }
 
@@ -306,7 +306,7 @@ function regist()
     //ログ書き込み
     global $name, $email, $sub, $com, $url, $tag, $past_key, $maxn, $maxs, $maxv, $maxline;
     global $password, $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai,
-    $PHP_SELF, $REQUEST_METHOD, $no_word;
+    $REQUEST_METHOD, $no_word;
 
     $validation = new Validation();
 
@@ -318,7 +318,7 @@ function regist()
         error("不正な投稿をしないで下さい");
     }
 
-    if (GAIBU && !preg_match("/" . $PHP_SELF . "/i", getenv("HTTP_REFERER"))) {
+    if (GAIBU && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
         error("外部から書き込みできません");
     }
 
@@ -470,19 +470,19 @@ function usrdel()
 function admin()
 {
     //管理機能
-    global $admin_pass, $PHP_SELF, $logfile;
+    global $admin_pass, $logfile;
     global $del, $apass, $head, $body;
     if ($apass && $apass != "$admin_pass") {error("パスワードが違います");}
     echo "$head";
     echo "$body";
-    echo "[<a href=\"$PHP_SELF?\">掲示板に戻る</a>]\n";
+    echo "[<a href=\"{$_SERVER['SCRIPT_NAME']}?\">掲示板に戻る</a>]\n";
     echo "<table width='100%'><tr><th bgcolor=\"#508000\">\n";
     echo "<font color=\"#FFFFFF\">管理モード</font>\n";
     echo "</th></tr></table>\n";
 
     if (!$apass) {
         echo "<P><center><h4>パスワードを入力して下さい</h4>\n";
-        echo "<form action=\"$PHP_SELF\" method=\"POST\">\n";
+        echo "<form action=\"{$_SERVER['SCRIPT_NAME']}\" method=\"POST\">\n";
         echo "<input type=hidden name=mode value=\"admin\">\n";
         echo "<input type=password name=apass size=8>";
         echo "<input type=submit value=\" 認証 \"></form>\n";
@@ -504,7 +504,7 @@ function admin()
         }
 
         // 削除画面を表示
-        echo "<form action=\"$PHP_SELF\" method=\"POST\">\n";
+        echo "<form action=\"{$_SERVER['SCRIPT_NAME']}\" method=\"POST\">\n";
         echo "<input type=hidden name=mode value=\"admin\">\n";
         echo "<input type=hidden name=apass value=\"$apass\">\n";
         echo "<center><P>削除したい記事のチェックボックスにチェックを入れ、削除ボタンを押して下さい。\n";
@@ -674,14 +674,14 @@ function pastView()
     }
 
     echo '<html><head><title>■ 過去ログ ' . $pno . ' ■</title>
-' . $body . '<font size=2>[<a href="' . $PHP_SELF . '?">掲示板に戻る</a>]</font><br>
+' . $body . '<font size=2>[<a href="' . $_SERVER['SCRIPT_NAME'] . '?">掲示板に戻る</a>]</font><br>
 <center>■ 過去ログ ' . $pno . ' ■<P>new← ';
     $pastkey = $count;
     while ($pastkey > 0) {
         if ($pno == $pastkey) {
             echo "[<b>$pastkey</b>]";
         } else {
-            echo "<a href=\"$PHP_SELF?mode=past&pno=$pastkey\">[$pastkey]</a>";
+            echo "<a href=\"{$_SERVER['SCRIPT_NAME']}?mode=past&pno=$pastkey\">[$pastkey]</a>";
         }
         $pastkey--;
     }
@@ -742,7 +742,7 @@ switch ($mode) {
         }
 
         // *転送
-        header("Location: $PHP_SELF");
+        header("Location: {$_SERVER['SCRIPT_NAME']}");
         break;
     case 'admin':
         // *管理
