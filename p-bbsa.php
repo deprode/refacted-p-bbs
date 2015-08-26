@@ -144,10 +144,6 @@ function head(&$dat)
     $r_sub = $r_com = $r_pass = null;
 
     //クッキーを頂きます
-    // *5.4以上で常にFALSEを返すようになったget_magic_quotes_gpc
-    if (get_magic_quotes_gpc()) {
-        $p_bbs = stripslashes($p_bbs);
-    }
 
     // * cookieには名前とメールが入っているので呼び出してるっぽい
     if (!$htmlw && isset($p_bbs)) {
@@ -385,15 +381,6 @@ function regist()
 
     $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
     $url = preg_replace("/^http:\/\//", "", $url);
-
-    if (get_magic_quotes_gpc()) {
-        //\を削除
-        $com = stripslashes($com);
-        $sub = stripslashes($sub);
-        $name = stripslashes($name);
-        $email = stripslashes($email);
-        $url = stripslashes($url);
-    }
 
     // ログの区切り文字である<>を参照文字に置換
     $com = str_replace("<>", "&lt;&gt;", $com);
