@@ -31,15 +31,6 @@ if (phpversion() >= "4.1.0") {
  * HTMLを書き出す場合は、そのディレクトリが707か777じゃないとダメです
  */
 
-// *$_GETに来るのは、mode,page,pno,noなので、これらをValidationした方がいい
-// *$_POSTに来るのは、mode,name,email,sub,com,url,password,no,pwd,apass,del[]なので、これらをValidationした方がいい
-// *extract使わないで、$_REQUESTから適切なローカル変数に代入した方がいい
-// *テンプレート組み立て部分はヒアドキュメント使った方が読みやすい
-// *調べたところ、大手レンタルサーバーはロリポップ以外は5.5以上に設定できるので、想定は5.5~
-// *HTMLタグ有効時にhtmlspecialcharsやってないので、せめてscriptは禁止した方がいい
-
-/* 設定ファイルを別に作って読み出した方がいいのでは。あとViewとかも分けた方が… */
-
 //-------------設定ここから-------------
 /* <title>に入れるタイトル */
 $title1 = 'P-BBS';
@@ -117,6 +108,8 @@ $no_word[] = 'novapublic';
 $no_word[] = 'http:';
 
 //---------設定ここまで--------------
+
+date_default_timezone_set('Asia/Tokyo');
 
 $mode = (isset($mode)) ? $mode : '';
 
