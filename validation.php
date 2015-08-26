@@ -29,6 +29,13 @@ class Validation
     public function e($string) {
         return htmlspecialchars($string, ENT_QUOTES, "UTF-8");
     }
+
+    public function isEmpty($s, $multiline = false) {
+        if ($multiline) {
+            return (!$s || preg_match("/^( |　|\t|\r|\n)*$/", $s));
+        }
+        return (!$s || preg_match("/^( |　)*$/", $s));
+    }
 /*
 本文にリンクタグがあったらエラー
 リクエストがPOST以外で投稿でエラー

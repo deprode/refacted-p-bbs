@@ -306,6 +306,8 @@ function regist()
     global $password, $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai,
     $PHP_SELF, $REQUEST_METHOD, $no_word;
 
+    $validation = new Validation();
+
     if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
         error("禁止ワードエラー！！");
     }
@@ -318,10 +320,16 @@ function regist()
         error("外部から書き込みできません");
     }
 
-    // フォーム内容をチェック
-    if (!$name || preg_match("/^( |　)*$/", $name)) {error("名前が書き込まれていません");}
-    if (!$com || preg_match("/^( |　|\t|\r|\n)*$/", $com)) {error("本文が書き込まれていません");}
-    if (!$sub || preg_match("/^( |　)*$/", $sub)) {$sub = $mudai;}
+    // フォームが空かチェック
+    if ($validation->isEmpty($name)) {
+        error("名前が書き込まれていません");
+    }
+    if ($validation->isEmpty($com)) {
+        error("本文が書き込まれていません");
+    }
+    if ($validation->isEmpty($sub)) {
+        $sub = $mudai;
+    }
 
     if (strlen($name) > $maxn) {error("名前が長すぎますっ！");}
     if (strlen($sub) > $maxs) {error("タイトルが長すぎますっ！");}
