@@ -327,9 +327,16 @@ function regist()
         $sub = $mudai;
     }
 
-    if (strlen($name) > $maxn) {error("名前が長すぎますっ！");}
-    if (strlen($sub) > $maxs) {error("タイトルが長すぎますっ！");}
-    if (strlen($com) > $maxv) {error("本文が長すぎますっ！");}
+    // 最大長チェック
+    if ($validation->overLength($name, $maxn)) {
+        error("名前が長すぎますっ！");
+    }
+    if ($validation->overLength($sub, $maxs)) {
+        error("タイトルが長すぎますっ！");
+    }
+    if ($validation->overLength($com, $maxv)) {
+        error("本文が長すぎますっ！");
+    }
 
     // 禁止ワード
     if (is_array($no_word)) {

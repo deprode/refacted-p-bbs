@@ -36,6 +36,11 @@ class Validation
         }
         return (!$s || preg_match("/^( |　)*$/", $s));
     }
+
+    public function overLength($s, $len)
+    {
+        return (mb_strlen($s) > $len);
+    }
 /*
 本文にリンクタグがあったらエラー
 リクエストがPOST以外で投稿でエラー
