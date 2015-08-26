@@ -5,7 +5,6 @@ require_once 'validation.php';
 // extractを使って、スーパーグローバルをパース、$hogeでとれるようにしてる
 if (phpversion() >= "4.1.0") {
     extract($_REQUEST);
-    extract($_SERVER);
 }
 
 /*
@@ -305,8 +304,7 @@ function regist()
 {
     //ログ書き込み
     global $name, $email, $sub, $com, $url, $tag, $past_key, $maxn, $maxs, $maxv, $maxline;
-    global $password, $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai,
-    $REQUEST_METHOD, $no_word;
+    global $password, $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai, $no_word;
 
     $validation = new Validation();
 
@@ -314,7 +312,7 @@ function regist()
         error("禁止ワードエラー！！");
     }
 
-    if ($REQUEST_METHOD != "POST") {
+    if ($SERVER['REQUEST_METHOD'] != "POST") {
         error("不正な投稿をしないで下さい");
     }
 
