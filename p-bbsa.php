@@ -255,10 +255,12 @@ function Main(&$dat)
         if ($tag == 0) {
             $sub = $validation->e($sub); //タグっ禁止
             $name = $validation->e($name);
-            $com = $validation->e($com);
             $email = $validation->e($email);
             $url = $validation->e($url);
+            $com = br2nl($com);
+            $com = $validation->e($com);
             $com = str_replace("&amp;", "&", $com);
+            $com = nl2br($com);
         }
 
         if ($url) {$url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";}
@@ -698,6 +700,10 @@ function autoLink($proto)
     //自動リンク5/25修正
     $proto = preg_replace("/(https?|ftp|news)(:\/\/[[A-Za-z0-9]\+\$\;\?\.%,!#~*\/:@&=_-]+)/", "<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>", $proto);
     return $proto;
+}
+
+function br2nl($string) {
+    return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
 }
 
 function error($mes)
