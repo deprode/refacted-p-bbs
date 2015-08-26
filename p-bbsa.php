@@ -687,7 +687,8 @@ function autoLink($proto)
     return $proto;
 }
 
-function br2nl($string) {
+function br2nl($string)
+{
     return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
 }
 
