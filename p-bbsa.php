@@ -724,47 +724,59 @@ function error($mes)
 /*=====================
     メイン
 ======================*/
-// *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
-switch ($mode) {
-    case 'regist':
-        // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
-        require_once "./rbl.php";
-        if (check_spam()) {
-            die("梅干たべてすっぱぃまん！！");
-        }
+/**
+* Main
+*/
+class Main
+{
+    function index()
+    {
+        // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
+        switch ($mode) {
+            case 'regist':
+                // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
+                require_once "./rbl.php";
+                if (check_spam()) {
+                    die("梅干たべてすっぱぃまん！！");
+                }
 
-        // *ログ書き込み
-        regist();
-        // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
-        if ($htmlw) {
-            MakeHtml();
-        }
+                // *ログ書き込み
+                regist();
+                // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
+                if ($htmlw) {
+                    MakeHtml();
+                }
 
-        // *転送
-        header("Location: {$_SERVER['SCRIPT_NAME']}");
-        break;
-    case 'admin':
-        // *管理
-        admin();
-        break;
-    case 'usrdel':
-        // *ユーザー権限による書き込みの削除
-        usrdel();
-        // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
-        if ($htmlw) {
-            MakeHtml();
-        }
+                // *転送
+                header("Location: {$_SERVER['SCRIPT_NAME']}");
+                break;
+            case 'admin':
+                // *管理
+                admin();
+                break;
+            case 'usrdel':
+                // *ユーザー権限による書き込みの削除
+                usrdel();
+                // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
+                if ($htmlw) {
+                    MakeHtml();
+                }
 
-        // HTML表示？
-        ShowHtml();
-        break;
-    case 'past':
-        // 過去ログモード
-        pastView();
-        break;
-    default:
-        ShowHtml();
-        break;
+                // HTML表示？
+                ShowHtml();
+                break;
+            case 'past':
+                // 過去ログモード
+                pastView();
+                break;
+            default:
+                ShowHtml();
+                break;
+        }
+    }
 }
+
+$main = new Main();
+$main->index();
 
 ?>
