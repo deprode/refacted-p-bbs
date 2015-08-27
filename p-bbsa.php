@@ -1,6 +1,7 @@
 <?php
 
 require_once 'validation.php';
+require_once 'config.php';
 
 /*
  * P-BBS by ToR
@@ -26,85 +27,8 @@ require_once 'validation.php';
  * HTMLを書き出す場合は、そのディレクトリが707か777じゃないとダメです
  */
 
-//-------------設定ここから-------------
-/* <title>に入れるタイトル */
-$title1 = 'P-BBS';
-/* 掲示板のTOPタイトル（HTML可）*/
-$title2 = '<font size=5 face=Verdana color=gray><b>P-BBS</b></font>';
-/* <body>タグ */
-$body = '<body bgcolor="#ddf2ed" text="#444444" link="#0000AA">';
-
-/* 管理者用パスワード。必ず変更して下さい。*/
-$admin_pass = '0123';
-
-/* ログ保存ファイル */
-$logfile = 'bbs.log';
-
-/* TOPページをHTMLに書き出すか （yes=1 no=0）*/
-$htmlw = 0;
-/* 静的HTMLを書き出す場合のHTMLファイル */
-$html_file = 'pbbs.html';
-
-/* 戻り先（HOME）*/
-$home = 'http://php.s3.to';
-/* 一ページあたりの表示記事数 */
-$page_def = 10;
-/* 最大記録件数 これを越えると古い物から過去ログへ移ります。*/
-$max = 30;
-/* 文字数制限（名前、題名、本文）全角だとこの半分です */
-$maxn = 40;
-$maxs = 40;
-$maxv = 1500;
-/* 本文の改行数制限 */
-$maxline = 25;
-/* 同一ホストからの連続投稿を制限
---> 秒数を記述するとその時間以上を経過しないと連続投稿できない*/
-$w_regist = 30;
-/* 文中で自動リンクするかどうか（yes=1 no=0）*/
-$autolink = 1;
-/* タイトル無しで投稿された場合 */
-$mudai = '(無題)';
-/* ＞がついた時の色 */
-$re_color = "#225588";
-/* ホストを表示するか（表示しない=0 <!-->内で表示=1 表示=2）*/
-$hostview = 1;
-/* 外部書き込み禁止にする?(する=1,しない=0) */
-define("GAIBU", 0);
-
-/* 使用するファイルロックのタイプ（mkdir=1 flock=2 使わない=0）*/
-define("LOCKEY", 2); //通常は2でOK
-/* mkdirロックを使う時はlockという名でディレクトリを作成して777にしてください */
-define("LOCK", "lock/plock"); //lockの中に作るロックファイル名
-
-/* 過去ログ作成する? */
-$past_key = 0;
-/* 過去ログ番号ファイル */
-$past_no = "pastno.log";
-/* 過去ログ作成ディレクトリ(書き込み権限必要) */
-$past_dir = "./";
-/* 過去ログ一つに書き込む行数 */
-$past_line = "50";
-
-// 閲覧禁止ホスト（正規表現可
-$no_host[] = 'kantei.go.jp';
-$no_host[] = 'anonymizer.com';
-$no_host[] = "pt$";
-$no_host[] = "ph$";
-$no_host[] = "my$";
-$no_host[] = "th$";
-$no_host[] = "rr.com";
-
-// 使用禁止ワード
-$no_word[] = '死ね';
-$no_word[] = '馬鹿';
-$no_word[] = 'novapublic';
-$no_word[] = 'http:';
-
-//---------設定ここまで--------------
-
 date_default_timezone_set('Asia/Tokyo');
 
-$mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
 
 // 禁止ホスト
 if (is_array($no_host)) {
@@ -128,7 +52,16 @@ function head(&$dat)
     $no = filter_input(INPUT_GET, 'no');
 
     //ヘッダー表示部
-    global $logfile, $title1, $title2, $body, $p_bbs, $htmlw, $max, $page_def;
+    $config = new Config();
+    $logfile = $config->getConfig('logfile');
+    $title1 = $config->getConfig('title1');
+    $title2 = $config->getConfig('title2');
+    $body = $config->getConfig('body');
+    $p_bbs = $config->getConfig('p_bbs');
+    $htmlw = $config->getConfig('htmlw');
+    $max = $config->getConfig('max');
+    $page_def = $config->getConfig('page_def');
+
     $r_name = $r_mail = null;
     $r_sub = $r_com = $r_pass = null;
 
@@ -197,7 +130,9 @@ DAT;
 function foot(&$dat)
 {
     //フッター表示部
-    global $home, $past_key;
+    $config = new Config();
+    $home = $config->getConfig('home');
+    $past_key = $config->getConfig('past_key');
 
     $past_log = ($past_key) ? '[ <a href=' . $_SERVER['SCRIPT_NAME'] . '?mode=past>過去ログ</a> ]' : '';
 
@@ -216,8 +151,12 @@ function Main(&$dat)
 {
     $page = filter_input(INPUT_GET, 'page');
 
-    //記事表示部
-    global $logfile, $page_def, $autolink, $re_color, $hostview;
+    $config = new Config();
+    $logfile = $config->getConfig('logfile');
+    $page_def = $config->getConfig('page_def');
+    $re_color = $config->getConfig('re_color');
+    $autolink = $config->getConfig('autolink');
+    $hostview = $config->getConfig('hostview');
 
     $validation = new Validation();
 
@@ -296,8 +235,20 @@ function regist()
     $password = filter_input(INPUT_POST, 'password');
 
     //ログ書き込み
-    global $past_key, $maxn, $maxs, $maxv, $maxline;
-    global $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai, $no_word;
+    $config = new Config();
+    $past_key = $config->getConfig('past_key');
+    $maxn = $config->getConfig('maxn');
+    $maxs = $config->getConfig('maxs');
+    $maxv = $config->getConfig('maxv');
+    $maxline = $config->getConfig('maxline');
+    $html_url = $config->getConfig('html_url');
+    $logfile = $config->getConfig('logfile');
+    $max = $config->getConfig('max');
+    $w_regist = $config->getConfig('w_regist');
+    $autolink = $config->getConfig('autolink');
+    $mudai = $config->getConfig('mudai');
+    $no_word = $config->getConfig('no_word');
+    $GAIBU = $config->getConfig('GAIBU');
 
     $validation = new Validation();
 
@@ -309,7 +260,7 @@ function regist()
         error("不正な投稿をしないで下さい");
     }
 
-    if (GAIBU && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
+    if ($GAIBU && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
         error("外部から書き込みできません");
     }
 
@@ -433,9 +384,10 @@ function usrdel()
 {
     $pwd = filter_input(INPUT_POST, 'pwd');
     $no = filter_input(INPUT_POST, 'no');
+    $config = new Config();
+    $logfile = $config->getConfig('logfile');
 
     //ユーザー削除
-    global $logfile;
     if ($no == "" || $pwd == "") {error("削除Noまたは削除キーが入力モレです");}
 
     $logall = file($logfile);
@@ -465,9 +417,20 @@ function admin()
     $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
     $del = array_filter($del, 'is_string');
 
+    $config = new Config();
+    $admin_pass = $config->getConfig('admin_pass');
+    $logfile = $config->getConfig('logfile');
+    $body = $config->getConfig('body');
+    $title1 = $config->getConfig('title1');
+
+    $head = <<<HEAD
+<html><head>
+<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
+<title>$title1</title>
+</head>
+HEAD;
+
     //管理機能
-    global $admin_pass, $logfile;
-    global $head, $body;
     if ($apass && $apass != "$admin_pass") {error("パスワードが違います");}
     echo "$head";
     echo "$body";
@@ -573,8 +536,10 @@ function unlockDir($name = "")
 
 function renewlog($arrline)
 {
+    $config = new Config();
+    $logfile = $config->getConfig('logfile');
+
     //ログ更新  入力:配列
-    global $logfile;
 
     if (LOCKEY == 1) {
         lockDir(LOCK)
@@ -592,7 +557,8 @@ function renewlog($arrline)
 function MakeHtml()
 {
     //HTML生成
-    global $html_file;
+    $config = new Config();
+    $html_file = $config->getConfig('html_file');
 
     head($buf);
     Main($buf);
@@ -615,8 +581,12 @@ function ShowHtml()
 
 function pastLog($data)
 {
+    $config = new Config();
+    $past_no = $config->getConfig('past_no');
+    $past_dir = $config->getConfig('past_dir');
+    $past_line = $config->getConfig('past_line');
+    $autolink = $config->getConfig('autolink');
 //過去ログ作成
-    global $past_no, $past_dir, $past_line, $autolink;
 
     $fc = @fopen($past_no, "r") or die(__LINE__ . $past_no . "が開けません");
     $count = fgets($fc, 10);
@@ -660,7 +630,11 @@ function pastView()
 {
     $pno = filter_input(INPUT_GET, 'pno');
 
-    global $past_no, $past_dir, $past_line, $body;
+    $config = new Config();
+    $past_no = $config->getConfig('past_no');
+    $past_dir = $config->getConfig('past_dir');
+    $past_line = $config->getConfig('past_line');
+    $body = $config->getConfig('body');
 
     $pno = htmlspecialchars($pno);
 
@@ -707,8 +681,10 @@ function br2nl($string)
 
 function error($mes)
 {
+    $config = new Config();
+    $body = $config->getConfig('body');
+
     //エラーフォーマット
-    global $body;
     ?>
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
@@ -731,6 +707,7 @@ class Main
 {
     function index()
     {
+        $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
         // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
         switch ($mode) {
             case 'regist':
