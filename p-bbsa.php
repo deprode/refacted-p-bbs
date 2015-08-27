@@ -2,11 +2,6 @@
 
 require_once 'validation.php';
 
-// extractを使って、スーパーグローバルをパース、$hogeでとれるようにしてる
-if (phpversion() >= "4.1.0") {
-    extract($_REQUEST);
-}
-
 /*
  * P-BBS by ToR
  * http://php.s3.to
@@ -111,7 +106,7 @@ $no_word[] = 'http:';
 
 date_default_timezone_set('Asia/Tokyo');
 
-$mode = (isset($mode)) ? $mode : '';
+$mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
 
 // 禁止ホスト
 if (is_array($no_host)) {
@@ -131,8 +126,11 @@ if (is_array($no_host)) {
 
 function head(&$dat)
 {
+    $mode = filter_input(INPUT_GET, 'mode');
+    $no = filter_input(INPUT_GET, 'no');
+
     //ヘッダー表示部
-    global $mode, $no, $logfile, $title1, $title2, $body, $p_bbs, $htmlw, $max, $page_def;
+    global $logfile, $title1, $title2, $body, $p_bbs, $htmlw, $max, $page_def;
     $r_name = $r_mail = null;
     $r_sub = $r_com = $r_pass = null;
 
@@ -218,8 +216,10 @@ DAT;
 
 function Main(&$dat)
 {
+    $page = filter_input(INPUT_GET, 'page');
+
     //記事表示部
-    global $logfile, $page_def, $page, $autolink, $re_color, $hostview, $tag;
+    global $logfile, $page_def, $autolink, $re_color, $hostview, $tag;
 
     $validation = new Validation();
 
@@ -291,9 +291,16 @@ function Main(&$dat)
 
 function regist()
 {
+    $name = filter_input(INPUT_POST, 'name');
+    $email = filter_input(INPUT_POST, 'email');
+    $sub = filter_input(INPUT_POST, 'sub');
+    $url = filter_input(INPUT_POST, 'url');
+    $com = filter_input(INPUT_POST, 'com');
+    $password = filter_input(INPUT_POST, 'password');
+
     //ログ書き込み
-    global $name, $email, $sub, $com, $url, $tag, $past_key, $maxn, $maxs, $maxv, $maxline;
-    global $password, $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai, $no_word;
+    global $tag, $past_key, $maxn, $maxs, $maxv, $maxline;
+    global $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai, $no_word;
 
     $validation = new Validation();
 
@@ -427,8 +434,11 @@ function regist()
 
 function usrdel()
 {
+    $pwd = filter_input(INPUT_POST, 'pwd');
+    $no = filter_input(INPUT_POST, 'no');
+
     //ユーザー削除
-    global $pwd, $no, $logfile;
+    global $logfile;
     if ($no == "" || $pwd == "") {error("削除Noまたは削除キーが入力モレです");}
 
     $logall = file($logfile);
@@ -454,9 +464,13 @@ function usrdel()
 
 function admin()
 {
+    $apass = filter_input(INPUT_POST, 'apass');
+    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
+    $del = array_filter($del, 'is_string');
+
     //管理機能
     global $admin_pass, $logfile;
-    global $del, $apass, $head, $body;
+    global $head, $body;
     if ($apass && $apass != "$admin_pass") {error("パスワードが違います");}
     echo "$head";
     echo "$body";
@@ -647,7 +661,9 @@ function pastLog($data)
 
 function pastView()
 {
-    global $past_no, $past_dir, $past_line, $body, $pno;
+    $pno = filter_input(INPUT_GET, 'pno');
+
+    global $past_no, $past_dir, $past_line, $body;
 
     $pno = htmlspecialchars($pno);
 
