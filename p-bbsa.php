@@ -301,7 +301,7 @@ function regist()
         error("禁止ワードエラー！！");
     }
 
-    if ($SERVER['REQUEST_METHOD'] != "POST") {
+    if ($_SERVER['REQUEST_METHOD'] != "POST") {
         error("不正な投稿をしないで下さい");
     }
 
