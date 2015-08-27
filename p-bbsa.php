@@ -62,8 +62,6 @@ $maxline = 25;
 $w_regist = 30;
 /* 文中で自動リンクするかどうか（yes=1 no=0）*/
 $autolink = 1;
-/* HTMLタグを有効にするか（yes=1 no=0)*/
-$tag = 0;
 /* タイトル無しで投稿された場合 */
 $mudai = '(無題)';
 /* ＞がついた時の色 */
@@ -219,7 +217,7 @@ function Main(&$dat)
     $page = filter_input(INPUT_GET, 'page');
 
     //記事表示部
-    global $logfile, $page_def, $autolink, $re_color, $hostview, $tag;
+    global $logfile, $page_def, $autolink, $re_color, $hostview;
 
     $validation = new Validation();
 
@@ -240,16 +238,15 @@ function Main(&$dat)
         list($no, $now, $name, $email, $sub, $com, $url,
             $host, $pw) = explode("<>", $view[$s]);
 
-        if ($tag == 0) {
-            $sub = $validation->h($sub); //タグっ禁止
-            $name = $validation->h($name);
-            $email = $validation->h($email);
-            $url = $validation->h($url);
-            $com = br2nl($com);
-            $com = $validation->h($com);
-            $com = str_replace("&amp;", "&", $com);
-            $com = nl2br($com);
-        }
+        // タグ禁止
+        $sub = $validation->h($sub);
+        $name = $validation->h($name);
+        $email = $validation->h($email);
+        $url = $validation->h($url);
+        $com = br2nl($com);
+        $com = $validation->h($com);
+        $com = str_replace("&amp;", "&", $com);
+        $com = nl2br($com);
 
         if ($url) {$url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";}
         if ($email) {$name = "<a href=\"mailto:$email\">$name</a>";}
@@ -299,7 +296,7 @@ function regist()
     $password = filter_input(INPUT_POST, 'password');
 
     //ログ書き込み
-    global $tag, $past_key, $maxn, $maxs, $maxv, $maxline;
+    global $past_key, $maxn, $maxs, $maxv, $maxline;
     global $html_url, $logfile, $jisa, $max, $w_regist, $autolink, $mudai, $no_word;
 
     $validation = new Validation();
