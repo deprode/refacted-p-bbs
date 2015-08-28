@@ -42,14 +42,12 @@ if (is_array($no_host)) {
     }
 }
 
-// Viewを使わずにHTMLを組み立ててやる感じ。にしても、global変数使いすぎでは、
-// って思ったけど、クラス使わずに設定から直にやってるのでこうなるっぽい。
-// 速度を気にしないなら、細かく分けて組み立てる感じにした方がいい。
-
 function head(&$dat)
 {
     $mode = filter_input(INPUT_GET, 'mode');
     $no = filter_input(INPUT_GET, 'no');
+
+    $p_bbs = filter_input(INPUT_COOKIE, 'p_bbs');
 
     //ヘッダー表示部
     $config = new Config();
@@ -57,7 +55,6 @@ function head(&$dat)
     $title1 = $config->getConfig('title1');
     $title2 = $config->getConfig('title2');
     $body = $config->getConfig('body');
-    $p_bbs = $config->getConfig('p_bbs');
     $htmlw = $config->getConfig('htmlw');
     $max = $config->getConfig('max');
     $page_def = $config->getConfig('page_def');
