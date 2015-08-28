@@ -4,6 +4,9 @@ require_once 'validation.php';
 require_once 'config.php';
 require_once 'template.php';
 
+// *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
+require_once "rbl.php";
+
 
 /*
  * P-BBS by ToR
@@ -831,8 +834,6 @@ class Main
         // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
         switch ($mode) {
             case 'regist':
-                // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
-                require_once "./rbl.php";
                 if (check_spam()) {
                     die("梅干たべてすっぱぃまん！！");
                 }
