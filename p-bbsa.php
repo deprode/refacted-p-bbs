@@ -187,14 +187,26 @@ function Main(&$dat)
         $com = str_replace("&amp;", "&", $com);
         $com = nl2br($com);
 
-        if ($url) {$url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";}
-        if ($email) {$name = "<a href=\"mailto:$email\">$name</a>";}
+        if ($url) {
+            $url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";
+        }
+        if ($email) {
+            $name = "<a href=\"mailto:$email\">$name</a>";
+        }
         // ＞がある時は色変更
         $com = preg_replace("/(^|>)(&gt;[^<]*)/i", "\\1<font color=$re_color>\\2</font>", $com);
         // URL自動リンク
-        if ($autolink) {$com = autoLink($com);}
+        if ($autolink) {
+            $com = autoLink($com);
+        }
         // Host表示形式
-        if ($hostview == 1) {$host = "<!--$host-->";} elseif ($hostview == 2) {$host = "[ $host ]";} else { $host = "";}
+        if ($hostview == 1) {
+            $host = "<!--$host-->";
+        } elseif ($hostview == 2) {
+            $host = "[ $host ]";
+        } else {
+            $host = "";
+        }
 
         $dat .= '<hr size=1>[<a href="' . $_SERVER['SCRIPT_NAME'] . '?mode=resmsg&no=' . $no . '">' . $no . '</a>] ';
         $dat .= '<font size="+1" color="#D01166"><b>' . $sub . '</b></font><br>';
@@ -215,7 +227,9 @@ function Main(&$dat)
     while ($total > 0) {
         if ($page == $p_li) {
             $dat .= "$p_no ";
-        } else { $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$p_li\">$p_no</a> ";}
+        } else {
+            $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$p_li\">$p_no</a> ";
+        }
         $p_no++;
         $p_li = $p_li + $page_def;
         $total = $total - $page_def;
