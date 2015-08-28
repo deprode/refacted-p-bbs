@@ -2,6 +2,8 @@
 
 require_once 'validation.php';
 require_once 'config.php';
+require_once 'template.php';
+
 
 /*
  * P-BBS by ToR
@@ -42,6 +44,38 @@ if (is_array($no_host)) {
     }
 }
 
+function getResMsg($logfile, $no)
+{
+    //レスの場合
+    $res = file($logfile);
+    $flag = 0;
+
+    while (list($key, $value) = each($res)) {
+        list($rno, $date, $name, $email, $sub, $com, $url) = explode("<>", $value);
+        if ($no == "$rno") {
+            $flag = 1;
+            break;
+        }
+    }
+
+    if ($flag == 0) {
+        error("該当記事が見つかりません");
+    }
+
+    if (preg_match("/Re\[([0-9]+)\]:/", $sub, $reg)) {
+        $reg[1]++;
+        $r_sub = preg_replace("/Re\[([0-9]+)\]:/", "Re[$reg[1]]:", $sub);
+    } elseif (preg_match("/^Re:/", $sub)) {
+        $r_sub = preg_replace("/^Re:/", "Re[2]:", $sub);
+    } else {
+        $r_sub = "Re:$sub";
+    }
+    $r_com = "&gt;$com";
+    $r_com = preg_replace("/<br( \/)?>/", "\r&gt;", $r_com);
+
+    return [$r_sub, $r_com];
+}
+
 function head(&$dat)
 {
     $mode = filter_input(INPUT_GET, 'mode');
@@ -70,31 +104,7 @@ function head(&$dat)
     }
 
     if ($mode == "resmsg") {
-        //レスの場合
-        $res = file($logfile);
-        $flag = 0;
-
-        while (list($key, $value) = each($res)) {
-            list($rno, $date, $name, $email, $sub, $com, $url) = explode("<>", $value);
-            if ($no == "$rno") {
-                $flag = 1;
-                break;}
-        }
-
-        if ($flag == 0) {
-            error("該当記事が見つかりません");
-        }
-
-        if (preg_match("/Re\[([0-9]+)\]:/", $sub, $reg)) {
-            $reg[1]++;
-            $r_sub = preg_replace("/Re\[([0-9]+)\]:/", "Re[$reg[1]]:", $sub);
-        } elseif (preg_match("/^Re:/", $sub)) {
-            $r_sub = preg_replace("/^Re:/", "Re[2]:", $sub);
-        } else {
-            $r_sub = "Re:$sub";
-        }
-        $r_com = "&gt;$com";
-        $r_com = preg_replace("/<br( \/)?>/", "\r&gt;", $r_com);
+        list($r_sub, $r_com) = getResMsg($logfile, $no);
     }
 
     $head = <<<HEAD
@@ -144,6 +154,68 @@ pass <input type=password name=pwd size=4 maxlength=8>
 DAT;
 }
 
+function createMain($view, $page, $page_def)
+{
+    $validation = new Validation();
+    $dat = [];
+
+    // ログファイルを読み出し、件数を数える
+    $total = sizeof($view);
+    $total2 = $total;
+
+    // 開始ページ（レス番号）数の設定
+    (isset($page)) ? $start = $page : $start = 0;
+    $end = $start + $page_def;
+    $st = $start + 1;
+
+    $p = 0;
+    for ($s = $start; $s < $end && $p < count($view); $s++) {
+        if (!$view[$s]) {
+            break;
+        }
+
+        list($no, $now, $name, $email, $sub, $com, $url,
+            $host,) = explode("<>", $view[$s]);
+
+        // タグ禁止
+        $sub = $validation->h($sub);
+        $name = $validation->h($name);
+        $email = $validation->h($email);
+        $url = $validation->h($url);
+        $com = br2nl($com);
+        $com = $validation->h($com);
+        $com = str_replace("&amp;", "&", $com);
+        $com = nl2br($com);
+
+        // URL自動リンク
+        if ($autolink) {
+            $com = autoLink($com);
+        }
+        // Host表示形式
+        if ($hostview == 1) {
+            $host = "<!--$host-->";
+        } elseif ($hostview == 2) {
+            $host = "[ $host ]";
+        } else {
+            $host = "";
+        }
+
+        $dat[] = [
+            'no' => $no,
+            'now' => $now,
+            'sub' => $sub,
+            'email' => $email,
+            'name' => $name,
+            'now' => $now,
+            'com' => $com,
+            'url' => $url,
+            'host' => $host
+        ];
+    }
+
+    return $dat;
+}
+
 function Main(&$dat)
 {
     $page = filter_input(INPUT_GET, 'page');
@@ -157,10 +229,12 @@ function Main(&$dat)
 
     $validation = new Validation();
 
+    // ログファイルを読み出し、件数を数える
     $view = file($logfile);
     $total = sizeof($view);
     $total2 = $total;
 
+    // 開始ページ（レス番号）数の設定
     (isset($page)) ? $start = $page : $start = 0;
     $end = $start + $page_def;
     $st = $start + 1;
@@ -583,11 +657,46 @@ function MakeHtml()
 
 function ShowHtml()
 {
-    head($buf);
-    Main($buf);
-    foot($buf);
+    $mode = filter_input(INPUT_GET, 'mode');
+    $no = filter_input(INPUT_GET, 'no');
+    $page = filter_input(INPUT_GET, 'page');
 
-    echo $buf;
+    $p_bbs = filter_input(INPUT_COOKIE, 'p_bbs');
+
+    $r_name = $r_mail = null;
+    $r_sub = $r_com = $r_pass = null;
+
+    $tpl = new Template();
+    $config = new Config();
+
+    $tpl->c = $config;
+    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
+
+    // * cookieには名前とメールが入っているので呼び出してるっぽい
+    $htmlw = $config->getConfig('htmlw');
+    if (!$htmlw && isset($p_bbs)) {
+        list($r_name, $r_mail) = explode(",", $p_bbs);
+    }
+    $logfile = $config->getConfig('logfile');
+    if ($mode == "resmsg") {
+        list($r_sub, $r_com) = getResMsg($logfile, $no);
+    }
+
+    $tpl->r_name = $r_name;
+    $tpl->r_mail = $r_mail;
+    $tpl->r_sub = $r_sub;
+    $tpl->r_com = $r_com;
+    $tpl->r_pass = $r_pass;
+
+    $page_def = $config->getConfig('page_def');
+    $view = file($logfile);
+    $tpl->dat = createMain($view, $page, $page_def);
+
+    $tpl->page = $page;
+    $tpl->start = (isset($page)) ? $page + 1 : 1;
+    $tpl->total = count($view);
+
+    $tpl->show('template/index.tpl.php');
 }
 
 function pastLog($data)
