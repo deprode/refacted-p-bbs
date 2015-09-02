@@ -329,92 +329,76 @@ function usrdel()
 
 function admin()
 {
-    $apass = filter_input(INPUT_POST, 'apass');
-    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
-    $del = array_filter($del, 'is_string');
-
+    $tpl = new Template();
     $config = new Config();
+
     $admin_pass = $config->getConfig('admin_pass');
     $logfile = $config->getConfig('logfile');
     $body = $config->getConfig('body');
     $title1 = $config->getConfig('title1');
 
-    $head = <<<HEAD
-<html><head>
-<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
-<title>$title1</title>
-</head>
-HEAD;
+    $apass = filter_input(INPUT_POST, 'apass');
+    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
+    $del = array_filter($del, 'is_string');
 
-    //管理機能
-    if ($apass && $apass != "$admin_pass") {error("パスワードが違います");}
-    echo "$head";
-    echo "$body";
-    echo "[<a href=\"{$_SERVER['SCRIPT_NAME']}?\">掲示板に戻る</a>]\n";
-    echo "<table width='100%'><tr><th bgcolor=\"#508000\">\n";
-    echo "<font color=\"#FFFFFF\">管理モード</font>\n";
-    echo "</th></tr></table>\n";
-
-    if (!$apass) {
-        echo "<P><center><h4>パスワードを入力して下さい</h4>\n";
-        echo "<form action=\"{$_SERVER['SCRIPT_NAME']}\" method=\"POST\">\n";
-        echo "<input type=hidden name=mode value=\"admin\">\n";
-        echo "<input type=password name=apass size=8>";
-        echo "<input type=submit value=\" 認証 \"></form>\n";
-    } else {
-        // 削除処理
-        if (is_array($del)) {
-            // 削除情報をマッチングし更新
-            $delall = file($logfile);
-
-            for ($i = 0; $i < count($delall); $i++) {
-                list($no) = explode("<>", $delall[$i]);
-                if (in_array($no, $del)) {
-                    $delall[$i] = "";
-                }
-
-            }
-            // ログを更新
-            renewlog($delall);
-        }
-
-        // 削除画面を表示
-        echo "<form action=\"{$_SERVER['SCRIPT_NAME']}\" method=\"POST\">\n";
-        echo "<input type=hidden name=mode value=\"admin\">\n";
-        echo "<input type=hidden name=apass value=\"$apass\">\n";
-        echo "<center><P>削除したい記事のチェックボックスにチェックを入れ、削除ボタンを押して下さい。\n";
-        echo "<P><table border=0 cellspacing=0>\n";
-        echo "<tr bgcolor=bbbbbb><th>削除</th><th>記事No</th><th>投稿日</th><th>題名</th>";
-        echo "<th>投稿者</th><th>コメント</th><th>ホスト名</th>";
-        echo "</tr>\n";
-
-        $delmode = file($logfile);
-
-        if (is_array($delmode)) {
-            while (list($l, $val) = each($delmode)) {
-                list($no, $date, $name, $email, $sub, $com, $url,
-                    $host, $pw, $tail, $w, $h, $time, $chk) = explode("<>", $val);
-
-                list($date, $dmy) = split("\(", $date);
-                if ($email) {$name = "<a href=\"mailto:$email\">$name</a>";}
-                $com = str_replace("<br>", "", $com);
-                $com = htmlspecialchars($com);
-                if (strlen($com) > 40) {$com = substr($com, 0, 38) . " ...";}
-
-                echo ($l % 2) ? "<tr bgcolor=F8F8F8>" : "<tr bgcolor=DDDDDD>";
-                echo "<th><input type=checkbox name=del[] value=\"$no\"></th>";
-                echo "<th>$no</th><td><small>$date</small></td><td>$sub</td>";
-                echo "<td><b>$name</b></td><td><small>$com</small></td>";
-                echo "<td>$host</td>\n</tr>\n";
-            }
-        }
-
-        echo "</table>\n";
-        echo "<P><input type=submit value=\"削除する\">";
-        echo "<input type=reset value=\"リセット\"></form>\n";
-
+    if (isset($apass) && $apass != $admin_pass) {
+        error('パスワードが違います');
     }
-    echo "</center></body></html>\n";
+
+    // 削除処理
+    if (is_array($del)) {
+        // 削除情報をマッチングし更新
+        $delall = file($logfile);
+
+        for ($i = 0; $i < count($delall); $i++) {
+            list($no) = explode("<>", $delall[$i]);
+            if (in_array($no, $del)) {
+                $delall[$i] = "";
+            }
+
+        }
+        // ログを更新
+        renewlog($delall);
+    }
+
+    // 削除画面を表示
+    $tpl->c = $config;
+    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
+
+    $tpl->apass = $apass;
+    $tpl->del = $del;
+
+
+    // ログを削除モードで表示
+    $delmode = file($logfile);
+    $logs = [];
+    if (is_array($delmode)) {
+        foreach ($delmode as $l => $val) {
+            list($no, $date, $name, $email, $sub, $com, ,
+                $host, , , , , $time, ) = explode("<>", $val);
+
+            list($date, $dmy) = split("\(", $date);
+            if ($email) {
+                $name = "<a href=\"mailto:$email\">$name</a>";
+            }
+            $com = str_replace("<br>", "", $com);
+            $com = htmlspecialchars($com);
+            if (strlen($com) > 40) {$com = substr($com, 0, 38) . " ...";}
+
+            $log = [];
+            $log['no'] = $no;
+            $log['date'] = $date;
+            $log['sub'] = $sub;
+            $log['name'] = $name;
+            $log['com'] = $com;
+            $log['host'] = $host;
+
+            $logs[] = $log;
+        }
+    }
+
+    $tpl->delmode = $logs;
+    $tpl->show('template/admin.tpl.php');
 }
 
 function lockDir($name = "")
