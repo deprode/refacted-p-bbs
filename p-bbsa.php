@@ -615,20 +615,17 @@ function br2nl($string)
     return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
 }
 
+//エラーフォーマット
 function error($mes)
 {
+    $tpl = new Template();
     $config = new Config();
     $body = $config->getConfig('body');
-
-    //エラーフォーマット
-    ?>
-<html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
-<?php echo $body;?>
-<br><br><hr size=1><br><br>
-<center><font color=red size=5><b><?php echo $mes;?></b></font></center>
-<br><br><hr size=1></body></html>
-	<?php
+    $tpl->c = $config;
+    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
+    $tpl->body = $config->getConfig('body');
+    $tpl->mes = $mes;
+    $tpl->show('template/error.tpl.php');
 
     exit;
 }
