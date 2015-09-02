@@ -79,84 +79,6 @@ function getResMsg($logfile, $no)
     return [$r_sub, $r_com];
 }
 
-function head(&$dat)
-{
-    $mode = filter_input(INPUT_GET, 'mode');
-    $no = filter_input(INPUT_GET, 'no');
-
-    $p_bbs = filter_input(INPUT_COOKIE, 'p_bbs');
-
-    //ヘッダー表示部
-    $config = new Config();
-    $logfile = $config->getConfig('logfile');
-    $title1 = $config->getConfig('title1');
-    $title2 = $config->getConfig('title2');
-    $body = $config->getConfig('body');
-    $htmlw = $config->getConfig('htmlw');
-    $max = $config->getConfig('max');
-    $page_def = $config->getConfig('page_def');
-
-    $r_name = $r_mail = null;
-    $r_sub = $r_com = $r_pass = null;
-
-    //クッキーを頂きます
-
-    // * cookieには名前とメールが入っているので呼び出してるっぽい
-    if (!$htmlw && isset($p_bbs)) {
-        list($r_name, $r_mail) = explode(",", $p_bbs);
-    }
-
-    if ($mode == "resmsg") {
-        list($r_sub, $r_com) = getResMsg($logfile, $no);
-    }
-
-    $head = <<<HEAD
-<html><head>
-<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
-<title>$title1</title>
-</head>
-HEAD;
-
-    $dat = $head . $body;
-    $dat .= <<<DAT
-<form method="POST" action="{$_SERVER['SCRIPT_NAME']}">
-<input type="hidden" name="mode" value="regist">
-<BASEFONT SIZE="3">$title2<hr size=1><br>
-<TT>
-お名前 <input type=text name="name" size=20 value="$r_name" maxlength=24><br>
-メール <input type=text name="email" size=30 value="$r_mail"><br>
-題名　 <input type=text name="sub" size=30 value="$r_sub">
-<input type=submit value="     投稿     "><input type=reset value="消す"><br>
-<textarea name="com" rows=5 cols=82>$r_com</textarea><br><br>
-ＵＲＬ　 <input type=text name="url" size=70 value="http://"><br>
-削除キー <input type=password name="password" size=8 value="$r_pass">(記事の削除用。英数字で8文字以内)
-</form></TT>
-<hr size=1><font size=-2>新しい記事から表示します。最高{$max}件の記事が記録され、それを超えると古い記事から過去ログへ移ります。<br>
- １回の表示で{$page_def}件を越える場合は、下のボタンを押すことで次の画面の記事を表示します。</font>
-DAT;
-
-}
-
-function foot(&$dat)
-{
-    //フッター表示部
-    $config = new Config();
-    $home = $config->getConfig('home');
-    $past_key = $config->getConfig('past_key');
-
-    $past_log = ($past_key) ? '[ <a href=' . $_SERVER['SCRIPT_NAME'] . '?mode=past>過去ログ</a> ]' : '';
-
-    $dat .= <<<DAT
-<div align="right"><form method="POST" action="{$_SERVER['SCRIPT_NAME']}">
-<input type=hidden name=mode value="usrdel">No <input type=text name=no size=2>
-pass <input type=password name=pwd size=4 maxlength=8>
-<input type=submit value="Del"></form>
-[ <a href=$home>ホーム</a> ] [ <a href={$_SERVER['SCRIPT_NAME']}?mode=admin>管理</a> ] $past_log
-<br><br><small><!-- P-BBS v1.232 -->- <a href="http://php.s3.to" target="_top">P-BBS</a> -</small></div>
-</body></html>
-DAT;
-}
-
 function createMain($view, $page, $page_def)
 {
     $validation = new Validation();
@@ -217,100 +139,6 @@ function createMain($view, $page, $page_def)
     }
 
     return $dat;
-}
-
-function Main(&$dat)
-{
-    $page = filter_input(INPUT_GET, 'page');
-
-    $config = new Config();
-    $logfile = $config->getConfig('logfile');
-    $page_def = $config->getConfig('page_def');
-    $re_color = $config->getConfig('re_color');
-    $autolink = $config->getConfig('autolink');
-    $hostview = $config->getConfig('hostview');
-
-    $validation = new Validation();
-
-    // ログファイルを読み出し、件数を数える
-    $view = file($logfile);
-    $total = sizeof($view);
-    $total2 = $total;
-
-    // 開始ページ（レス番号）数の設定
-    (isset($page)) ? $start = $page : $start = 0;
-    $end = $start + $page_def;
-    $st = $start + 1;
-
-    $p = 0;
-    for ($s = $start; $s < $end && $p < count($view); $s++) {
-        if (!$view[$s]) {
-            break;
-        }
-
-        list($no, $now, $name, $email, $sub, $com, $url,
-            $host, $pw) = explode("<>", $view[$s]);
-
-        // タグ禁止
-        $sub = $validation->h($sub);
-        $name = $validation->h($name);
-        $email = $validation->h($email);
-        $url = $validation->h($url);
-        $com = br2nl($com);
-        $com = $validation->h($com);
-        $com = str_replace("&amp;", "&", $com);
-        $com = nl2br($com);
-
-        if ($url) {
-            $url = "<a href=\"http://$url\" target=\"_blank\">http://$url</a>";
-        }
-        if ($email) {
-            $name = "<a href=\"mailto:$email\">$name</a>";
-        }
-        // ＞がある時は色変更
-        $com = preg_replace("/(^|>)(&gt;[^<]*)/i", "\\1<font color=$re_color>\\2</font>", $com);
-        // URL自動リンク
-        if ($autolink) {
-            $com = autoLink($com);
-        }
-        // Host表示形式
-        if ($hostview == 1) {
-            $host = "<!--$host-->";
-        } elseif ($hostview == 2) {
-            $host = "[ $host ]";
-        } else {
-            $host = "";
-        }
-
-        $dat .= '<hr size=1>[<a href="' . $_SERVER['SCRIPT_NAME'] . '?mode=resmsg&no=' . $no . '">' . $no . '</a>] ';
-        $dat .= '<font size="+1" color="#D01166"><b>' . $sub . '</b></font><br>';
-        $dat .= '　Name：<font color="#007000"><b>' . $name . '</b></font><font size="-1">　Date： ' . $now . '</font>';
-        $dat .= '<p><blockquote><tt>' . $com . '<br></tt>';
-        $dat .= '<p>' . $url . '<br>' . $host . '</blockquote><p>';
-
-        $p++;
-    } //end for
-
-    $prev = $page - $page_def;
-    $next = $page + $page_def;
-    $dat .= sprintf("<hr size=1> %d 番目から %d 番目の記事を表示<br><center>Page:[<b> ", $st, $st + $p - 1);
-    ($page > 0) ? $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$prev\">&lt;&lt;</a> " : $dat .= " ";
-    $p_no = 1;
-    $p_li = 0;
-
-    while ($total > 0) {
-        if ($page == $p_li) {
-            $dat .= "$p_no ";
-        } else {
-            $dat .= "<a href=\"{$_SERVER['SCRIPT_NAME']}?page=$p_li\">$p_no</a> ";
-        }
-        $p_no++;
-        $p_li = $p_li + $page_def;
-        $total = $total - $page_def;
-    }
-
-    ($total2 > $next) ? $dat .= " <a href=\"{$_SERVER['SCRIPT_NAME']}?page=$next\">&gt;&gt;</a>" : $dat .= " ";
-    $dat .= "</b> ]\n";
 }
 
 function regist()
@@ -648,9 +476,10 @@ function MakeHtml()
     $config = new Config();
     $html_file = $config->getConfig('html_file');
 
-    head($buf);
-    Main($buf);
-    foot($buf);
+    ob_start();
+    ShowHtml();
+    $buf = ob_get_contents();
+    ob_end_clean();
 
     $hp = @fopen($html_file, "w");
     flock($hp, 2);
@@ -830,6 +659,8 @@ class Main
 {
     function index()
     {
+        $config = new Config();
+        $htmlw = $config->getConfig('htmlw');
         $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
         // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
         switch ($mode) {
