@@ -566,11 +566,11 @@ function pastView()
 {
     $pno = filter_input(INPUT_GET, 'pno');
 
+    $tpl = new Template();
     $config = new Config();
+
     $past_no = $config->getConfig('past_no');
     $past_dir = $config->getConfig('past_dir');
-    $past_line = $config->getConfig('past_line');
-    $body = $config->getConfig('body');
 
     $pno = htmlspecialchars($pno);
 
@@ -581,26 +581,20 @@ function pastView()
         $pno = $count;
     }
 
-    echo '<html><head><title>■ 過去ログ ' . $pno . ' ■</title>
-' . $body . '<font size=2>[<a href="' . $_SERVER['SCRIPT_NAME'] . '?">掲示板に戻る</a>]</font><br>
-<center>■ 過去ログ ' . $pno . ' ■<P>new← ';
-    $pastkey = $count;
-    while ($pastkey > 0) {
-        if ($pno == $pastkey) {
-            echo "[<b>$pastkey</b>]";
-        } else {
-            echo "<a href=\"{$_SERVER['SCRIPT_NAME']}?mode=past&pno=$pastkey\">[$pastkey]</a>";
-        }
-        $pastkey--;
-    }
-    echo ' →old</center>' . $past_line . '件ずつ表示';
     $pastfile = $past_dir . "index" . $pno . ".html";
     if (!file_exists($pastfile)) {
         error("<br>過去ログがみつかりません");
     }
 
-    include $pastfile;
-    die("</body></html>");
+    $tpl->pno = $pno;
+    $tpl->count = $count;
+    $tpl->pastfile = $pastfile;
+
+    $tpl->c = $config;
+    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
+    $tpl->show('template/past.tpl.php');
+
+    exit;
 }
 
 function autoLink($proto)
