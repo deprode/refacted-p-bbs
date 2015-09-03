@@ -633,11 +633,10 @@ function error($mes)
 */
 class Main
 {
-    function index()
+    function index($mode)
     {
         $config = new Config();
         $htmlw = $config->getConfig('htmlw');
-        $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
         // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
         switch ($mode) {
             case 'regist':
@@ -681,7 +680,9 @@ class Main
     }
 }
 
+$mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
+
 $main = new Main();
-$main->index();
+$main->index($mode);
 
 ?>
