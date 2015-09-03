@@ -614,11 +614,12 @@ function error($mes)
 {
     $tpl = new Template();
     $config = new Config();
-    $body = $config->getConfig('body');
+
     $tpl->c = $config;
     $tpl->script_name = $_SERVER['SCRIPT_NAME'];
     $tpl->body = $config->getConfig('body');
     $tpl->mes = $mes;
+
     $tpl->show('template/error.tpl.php');
 
     exit;
