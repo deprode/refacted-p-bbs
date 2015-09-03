@@ -93,7 +93,7 @@
         </form>
         [ <a href=<?php echo $c->home;?>>ホーム</a> ] [ <a href=<?php echo $script_name;?>?mode=admin>管理</a> ]
         <?php if($c->past_key): ?>
-            [ <a href=<?php echo $script_name; ?>?mode=past>過去ログ</a> ];
+            [ <a href=<?php echo $script_name; ?>?mode=past>過去ログ</a> ]
         <?php endif; ?>
         <br><br>
         <small><!-- P-BBS v1.232 -->- <a href="http://php.s3.to" target="_top">P-BBS</a> -</small>
