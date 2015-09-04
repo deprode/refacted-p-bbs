@@ -259,7 +259,7 @@ function regist()
         //最大記事数処理
         $new_log[$i] = $old_log[$i - 1];
     }
-    renewlog($new_log); //ログ更新
+    Log::renewlog($logfile, $new_log); //ログ更新
 
 }
 
@@ -291,7 +291,7 @@ function usrdel()
     if (($match != $pass)) {error("削除キーが違います");}
 
     // ログを更新
-    renewlog($pushlog);
+    Log::renewlog($logfile, $pushlog);
 }
 
 function admin()
@@ -325,7 +325,7 @@ function admin()
 
         }
         // ログを更新
-        renewlog($delall);
+        Log::renewlog($logfile, $delall);
     }
 
     // 削除画面を表示
@@ -366,59 +366,6 @@ function admin()
 
     $tpl->delmode = $logs;
     $tpl->show('template/admin.tpl.php');
-}
-
-function lockDir($name = "")
-{
-    //ディレクトリロック
-    if ($name == "") {
-        $name = "lock";
-    }
-
-    // 3分以上前のディレクトリなら解除失敗とみなして削除
-    if ((file_exists($name)) && filemtime($name) < time() - 180) {
-        @RmDir($name);
-    }
-
-    do {
-        if (@MkDir($name, 0777)) {
-            return 1;
-        }
-        sleep(1); // 一秒待って再トライ
-        $i++;
-    } while ($i < 5);
-
-    return 0;
-}
-
-function unlockDir($name = "")
-{
-    //ロック解除
-    if ($name == "") {
-        $name = "lock";
-    }
-
-    @rmdir($name);
-}
-
-function renewlog($arrline)
-{
-    $config = new Config();
-    $logfile = $config->getConfig('logfile');
-
-    //ログ更新  入力:配列
-
-    if (LOCKEY == 1) {
-        lockDir(LOCK)
-        or error("ロックエラー<br>しばらく待ってからにして下さい");}
-
-    $rp = fopen($logfile, "w");
-    if (LOCKEY == 2) {flock($rp, 2);}
-    while (list(, $val) = each($arrline)) {
-        fputs($rp, $val);
-    }
-    fclose($rp);
-    if (LOCKEY == 1) {unlockDir(LOCK);}
 }
 
 function MakeHtml()
