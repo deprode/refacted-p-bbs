@@ -3,6 +3,7 @@
 require_once 'validation.php';
 require_once 'config.php';
 require_once 'template.php';
+require_once 'log.php';
 
 // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
 require_once "rbl.php";
@@ -50,21 +51,13 @@ if (is_array($no_host)) {
 function getResMsg($logfile, $no)
 {
     //レスの場合
-    $res = file($logfile);
-    $flag = 0;
-
-    while (list($key, $value) = each($res)) {
-        list($rno, $date, $name, $email, $sub, $com, $url) = explode("<>", $value);
-        if ($no == "$rno") {
-            $flag = 1;
-            break;
-        }
-    }
-
-    if ($flag == 0) {
+    $data = Log::getResData($logfile, $no);
+    if ($data === null) {
         error("該当記事が見つかりません");
     }
 
+    $sub = $data['sub'];
+    $com = $data['com'];
     if (preg_match("/Re\[([0-9]+)\]:/", $sub, $reg)) {
         $reg[1]++;
         $r_sub = preg_replace("/Re\[([0-9]+)\]:/", "Re[$reg[1]]:", $sub);
