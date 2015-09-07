@@ -70,4 +70,56 @@ class Log
         fclose($rp);
 
     }
+
+    /**
+     * 削除パスの取得
+     * @param $filename ログファイル名
+     * @param $no 削除パスを取得するレス番号
+     * @return string|null 削除パス。見つからなければnull。削除パスが設定されていなければ空文字列。
+     */
+    public static function searchDelPass($filename, $no)
+    {
+        $res = Log::getDataFromFile($filename);
+        if ($res === false) {
+            return null;
+        }
+
+        $pass = null;
+
+        // 同じ番号の削除パスを検索
+        foreach ($res as $lines) {
+            list($ono, , , , , , , , $opas) = explode("<>", $lines);
+            if (intval($no, 10) === intval($ono, 10)) {
+                $pass = $opas;
+                break;
+            }
+        }
+
+        return $pass;
+    }
+
+    /**
+     * ユーザーによる削除
+     * @param $filename ログファイル名
+     * @param $no 削除するレス番号
+     */
+    public static function removeRes($filename, $no)
+    {
+        $res = Log::getDataFromFile($filename);
+        if ($res === false) {
+            return;
+        }
+
+        // 削除するレス以外を収集
+        $pushlog = [];
+        foreach ($res as $lines) {
+            list($ono, , , , , , , , ) = explode("<>", $lines);
+            if (intval($no, 10) !== intval($ono, 10)) {
+                $pushlog[] = $lines;
+            }
+        }
+
+        // 該当レス以外のログで上書き
+        Log::renewlog($filename, $pushlog);
+    }
 }

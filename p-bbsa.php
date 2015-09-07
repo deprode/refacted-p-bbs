@@ -265,31 +265,18 @@ function usrdel()
 {
     $pwd = filter_input(INPUT_POST, 'pwd');
     $no = filter_input(INPUT_POST, 'no');
-    $config = new Config();
-    $logfile = $config->getConfig('logfile');
+    $logfile = Config::get('logfile');
 
     //ユーザー削除
-    if ($no == "" || $pwd == "") {
+    if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
         error("削除Noまたは削除キーが入力モレです");
     }
 
-    $logall = file($logfile);
-    $flag = 0;
+    $pass = Log::searchDelPass($logfile, $no);
 
-    while (list(, $lines) = each($logall)) {
-        list($ono, $dat, $name, $email, $sub, $com, $url, $host, $opas) = explode("<>", $lines);
-        if ($no == "$ono") {
-            $flag = 1;
-            $pass = $opas;
-        } else {
-            $pushlog[] = $lines;
-        }
-    }
-
-    if ($flag == 0) {
+    if (isset($pass) === false) {
         error("該当記事が見当たりません");
-    }
-    if ($pass == "") {
+    } else if ($pass === "") {
         error("該当記事には削除キーが設定されていません");
     }
 
@@ -300,7 +287,7 @@ function usrdel()
     }
 
     // ログを更新
-    Log::renewlog($logfile, $pushlog);
+    Log::removeRes($logfile, $no);
 }
 
 function admin()
