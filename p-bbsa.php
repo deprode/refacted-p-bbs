@@ -568,7 +568,7 @@ class Main
         switch ($mode) {
             case 'regist':
                 if (check_spam()) {
-                    die("梅干たべてすっぱぃまん！！");
+                    die("指定されたIPからは投稿できません。");
                 }
 
                 // *ログ書き込み
