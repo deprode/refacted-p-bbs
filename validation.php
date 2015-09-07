@@ -34,9 +34,9 @@ class Validation
     public static function isEmpty($s, $multiline = false)
     {
         if ($multiline) {
-            return (!$s || preg_match("/^( |　|\t|\r|\n)*$/", $s));
+            return (empty($s) || preg_match("/^( |　|\t|\r|\n)*$/", $s));
         }
-        return (!$s || preg_match("/^( |　)*$/", $s));
+        return (empty($s) || preg_match("/^( |　)*$/", $s));
     }
 
     public static function overLength($s, $len)
