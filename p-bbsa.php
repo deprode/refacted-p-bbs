@@ -48,7 +48,6 @@ function getResMsg($logfile, $no)
 
 function createMain($view, $page, $page_def)
 {
-    $validation = new Validation();
     $dat = [];
 
     // ログファイルを読み出し、件数を数える
@@ -70,12 +69,12 @@ function createMain($view, $page, $page_def)
             $host,) = explode("<>", $view[$s]);
 
         // タグ禁止
-        $sub = $validation->h($sub);
-        $name = $validation->h($name);
-        $email = $validation->h($email);
-        $url = $validation->h($url);
+        $sub = Validation::h($sub);
+        $name = Validation::h($name);
+        $email = Validation::h($email);
+        $url = Validation::h($url);
         $com = br2nl($com);
-        $com = $validation->h($com);
+        $com = Validation::h($com);
         $com = str_replace("&amp;", "&", $com);
         $com = nl2br($com);
 
@@ -133,8 +132,6 @@ function regist()
     $no_word = $config->getConfig('no_word');
     $GAIBU = $config->getConfig('GAIBU');
 
-    $validation = new Validation();
-
     if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
         error("禁止ワードエラー！！");
     }
@@ -148,24 +145,24 @@ function regist()
     }
 
     // フォームが空かチェック
-    if ($validation->isEmpty($name)) {
+    if (Validation::isEmpty($name)) {
         error("名前が書き込まれていません");
     }
-    if ($validation->isEmpty($com)) {
+    if (Validation::isEmpty($com)) {
         error("本文が書き込まれていません");
     }
-    if ($validation->isEmpty($sub)) {
+    if (Validation::isEmpty($sub)) {
         $sub = $mudai;
     }
 
     // 最大長チェック
-    if ($validation->overLength($name, $maxn)) {
+    if (Validation::overLength($name, $maxn)) {
         error("名前が長すぎますっ！");
     }
-    if ($validation->overLength($sub, $maxs)) {
+    if (Validation::overLength($sub, $maxs)) {
         error("タイトルが長すぎますっ！");
     }
-    if ($validation->overLength($com, $maxv)) {
+    if (Validation::overLength($com, $maxv)) {
         error("本文が長すぎますっ！");
     }
 
