@@ -107,6 +107,56 @@ function createMain($view, $page, $page_def)
     return $dat;
 }
 
+function validationPost()
+{
+    $error_msg = '';
+
+    if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
+        $error_msg .= "禁止ワードエラー！！" . PHP_EOL;
+    }
+
+    // フォームが空かチェック
+    if (Validation::isEmpty($name)) {
+        $error_msg .= "名前が書き込まれていません" . PHP_EOL;
+    }
+    if (Validation::isEmpty($com)) {
+        $error_msg .= "本文が書き込まれていません" . PHP_EOL;
+    }
+    if (Validation::isEmpty($sub)) {
+        $sub = Config::get('mudai');
+    }
+
+    // 最大長チェック
+    if (Validation::overLength($name, Config::get('maxn'))) {
+        $error_msg .= "名前が長すぎますっ！" . PHP_EOL;
+    }
+    if (Validation::overLength($sub, Config::get('maxs'))) {
+        $error_msg .= "タイトルが長すぎますっ！" . PHP_EOL;
+    }
+    if (Validation::overLength($com, Config::get('maxv'))) {
+        $error_msg .= "本文が長すぎますっ！" . PHP_EOL;
+    }
+
+    // 禁止ワード
+    $no_word = Config::get('maxn');
+    if (is_array($no_word)) {
+        foreach ($no_word as $fuck) {
+            if (preg_match("/$fuck/", $com)) {
+                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+            }
+
+            if (preg_match("/$fuck/", $sub)) {
+                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+            }
+
+            if (preg_match("/$fuck/", $name)) {
+                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+            }
+
+        }
+    }
+}
+
 function regist()
 {
     $name = filter_input(INPUT_POST, 'name');
@@ -117,71 +167,19 @@ function regist()
     $password = filter_input(INPUT_POST, 'password');
 
     //ログ書き込み
-    $config = new Config();
-    $past_key = $config->getConfig('past_key');
-    $maxn = $config->getConfig('maxn');
-    $maxs = $config->getConfig('maxs');
-    $maxv = $config->getConfig('maxv');
-    $maxline = $config->getConfig('maxline');
-    $html_url = $config->getConfig('html_url');
-    $logfile = $config->getConfig('logfile');
-    $max = $config->getConfig('max');
-    $w_regist = $config->getConfig('w_regist');
-    $autolink = $config->getConfig('autolink');
-    $mudai = $config->getConfig('mudai');
-    $no_word = $config->getConfig('no_word');
-    $GAIBU = $config->getConfig('GAIBU');
-
-    if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
-        error("禁止ワードエラー！！");
-    }
+    $logfile = Config::get('logfile');
 
     if ($_SERVER['REQUEST_METHOD'] != "POST") {
         error("不正な投稿をしないで下さい");
     }
 
-    if ($GAIBU && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
+    if (Config::get('GAIBU') && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
         error("外部から書き込みできません");
     }
 
-    // フォームが空かチェック
-    if (Validation::isEmpty($name)) {
-        error("名前が書き込まれていません");
-    }
-    if (Validation::isEmpty($com)) {
-        error("本文が書き込まれていません");
-    }
-    if (Validation::isEmpty($sub)) {
-        $sub = $mudai;
-    }
-
-    // 最大長チェック
-    if (Validation::overLength($name, $maxn)) {
-        error("名前が長すぎますっ！");
-    }
-    if (Validation::overLength($sub, $maxs)) {
-        error("タイトルが長すぎますっ！");
-    }
-    if (Validation::overLength($com, $maxv)) {
-        error("本文が長すぎますっ！");
-    }
-
-    // 禁止ワード
-    if (is_array($no_word)) {
-        foreach ($no_word as $fuck) {
-            if (preg_match("/$fuck/", $com)) {
-                error("使用できない言葉が含まれています！");
-            }
-
-            if (preg_match("/$fuck/", $sub)) {
-                error("使用できない言葉が含まれています！");
-            }
-
-            if (preg_match("/$fuck/", $name)) {
-                error("使用できない言葉が含まれています！");
-            }
-
-        }
+    $error_msg = validationPost($name, $sub, $com);
+    if (mb_strlen($error_msg) > 0) {
+        error($error_msg);
     }
 
     $times = time();
@@ -194,6 +192,7 @@ function regist()
         error("二重投稿は禁止です");
     }
 
+    $w_regist = Config::get('w_regist');
     if ($w_regist && $times - $ttime < $w_regist) {
         error("連続投稿はもうしばらく時間を置いてからお願い致します");
     }
@@ -230,7 +229,7 @@ function regist()
     /* \n数える（substr_countの代わり）*/
     $temp = str_replace("\n", "\n" . "a", $com);
     $str_cnt = strlen($temp) - strlen($com);
-    if ($str_cnt > $maxline) {
+    if ($str_cnt > Config::get('maxline')) {
         error("行数が長すぎますっ！");
     }
 
@@ -244,10 +243,11 @@ function regist()
     $cookvalue = implode(",", array($name, $email));
     setcookie("p_bbs", $cookvalue, time() + 14 * 24 * 3600); /* 2週間で期限切れ */
 
+    $max = Config::get('max');
     $old_log = file($logfile);
     $line = sizeof($old_log);
     $new_log[0] = $new_msg; //先頭に新記事
-    if ($past_key && $line >= $max) {
+    if (Config::get('past_key') && $line >= $max) {
         //はみ出した記事を過去ログへ
         for ($s = $max; $s <= $line; $s++) { //念の為複数行対応
             pastLog($old_log[$s - 1]);
@@ -259,7 +259,6 @@ function regist()
         $new_log[$i] = $old_log[$i - 1];
     }
     Log::renewlog($logfile, $new_log); //ログ更新
-
 }
 
 function usrdel()
@@ -546,7 +545,7 @@ function error($mes)
 {
     $tpl = new Template();
 
-    $tpl->mes = $mes;
+    $tpl->mes = nl2br($mes);
 
     $tpl->show('template/error.tpl.php');
 
