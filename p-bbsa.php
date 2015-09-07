@@ -545,11 +545,7 @@ function br2nl($string)
 function error($mes)
 {
     $tpl = new Template();
-    $config = new Config();
 
-    $tpl->c = $config;
-    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
-    $tpl->body = $config->getConfig('body');
     $tpl->mes = $mes;
 
     $tpl->show('template/error.tpl.php');

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo $c->title1; ?></title>
+    <title>エラー</title>
     <style type="text/css">
 .content {
     margin: 60px 0;
@@ -18,7 +18,7 @@
 }
     </style>
 </head>
-<body <?php echo $c->body; ?>>
+<body>
 <div class="content">
     <hr size="1">
         <div class="center">
