@@ -593,8 +593,8 @@ class Main
                     MakeHtml();
                 }
 
-                // HTML表示？
-                ShowHtml();
+                // *転送
+                header("Location: {$_SERVER['SCRIPT_NAME']}");
                 break;
             case 'past':
                 // 過去ログモード
