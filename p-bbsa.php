@@ -433,7 +433,7 @@ function ShowHtml()
     $view = file($logfile);
     $tpl->dat = createMain($view, $page, $page_def);
 
-    $tpl->page = $page;
+    $tpl->page = $page ?: 0;
     $tpl->start = (isset($page)) ? $page + 1 : 1;
     $tpl->total = count($view);
 
