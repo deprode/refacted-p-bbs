@@ -230,7 +230,9 @@ function regist()
     /* \n数える（substr_countの代わり）*/
     $temp = str_replace("\n", "\n" . "a", $com);
     $str_cnt = strlen($temp) - strlen($com);
-    if ($str_cnt > $maxline) {error("行数が長すぎますっ！");}
+    if ($str_cnt > $maxline) {
+        error("行数が長すぎますっ！");
+    }
 
     $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
     $com = nl2br($com); //改行文字の前に<br>を代入する。
@@ -268,7 +270,9 @@ function usrdel()
     $logfile = $config->getConfig('logfile');
 
     //ユーザー削除
-    if ($no == "" || $pwd == "") {error("削除Noまたは削除キーが入力モレです");}
+    if ($no == "" || $pwd == "") {
+        error("削除Noまたは削除キーが入力モレです");
+    }
 
     $logall = file($logfile);
     $flag = 0;
@@ -277,15 +281,24 @@ function usrdel()
         list($ono, $dat, $name, $email, $sub, $com, $url, $host, $opas) = explode("<>", $lines);
         if ($no == "$ono") {
             $flag = 1;
-            $pass = $opas;} else { $pushlog[] = $lines;}
+            $pass = $opas;
+        } else {
+            $pushlog[] = $lines;
+        }
     }
 
-    if ($flag == 0) {error("該当記事が見当たりません");}
-    if ($pass == "") {error("該当記事には削除キーが設定されていません");}
+    if ($flag == 0) {
+        error("該当記事が見当たりません");
+    }
+    if ($pass == "") {
+        error("該当記事には削除キーが設定されていません");
+    }
 
     // 削除キーを照合
     $match = password_verify($pwd, $pass);
-    if (($match != $pass)) {error("削除キーが違います");}
+    if (($match != $pass)) {
+        error("削除キーが違います");
+    }
 
     // ログを更新
     Log::renewlog($logfile, $pushlog);
@@ -457,12 +470,18 @@ function pastLog($data)
     list($pno, $pdate, $pname, $pemail, $psub,
         $pcom, $purl, $pho, $ppw) = explode("<>", $data);
 
-    if ($purl) {$purl = "<a href=\"http://$purl\" target=\"_blank\">HP</a>";}
-    if ($pemail) {$pname = "<a href=\"mailto:$pemail\">$pname</a>";}
+    if ($purl) {
+        $purl = "<a href=\"http://$purl\" target=\"_blank\">HP</a>";
+    }
+    if ($pemail) {
+        $pname = "<a href=\"mailto:$pemail\">$pname</a>";
+    }
     // ＞がある時は色変更
     $pcom = preg_replace("/(&gt;)([^<]*)/i", "<font color=999999>\\1\\2</font>", $pcom);
     // URL自動リンク
-    if ($autolink) {$pcom = autoLink($pcom);}
+    if ($autolink) {
+        $pcom = autoLink($pcom);
+    }
 
     $dat .= "<hr>[$pno] <font color=\"#009900\"><b>$psub</b></font> Name：<b>$pname</b> <small>Date：$pdate</small> $purl<br><ul>$pcom</ul><!-- $pho -->\n";
 
