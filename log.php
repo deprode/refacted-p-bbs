@@ -58,10 +58,14 @@ class Log
     {
         $rp = fopen($filename, "w");
         if (LOCKEY == 2) {
-            flock($rp, 2);
+            flock($rp, LOCK_EX);
         }
         foreach ($arrline as $val) {
             fputs($rp, $val);
+        }
+        if (LOCKEY == 2) {
+            fflush($rp);
+            flock($rp, LOCK_UN);
         }
         fclose($rp);
 

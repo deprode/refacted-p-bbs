@@ -380,8 +380,10 @@ function MakeHtml()
     ob_end_clean();
 
     $hp = @fopen($html_file, "w");
-    flock($hp, 2);
+    flock($hp, LOCK_EX);
     fputs($hp, $buf);
+    fflush($hp);
+    flock($hp, LOCK_UN);
     fclose($hp);
 }
 
