@@ -22,7 +22,7 @@ class ViewModel
     public static function autoLink($proto)
     {
         //自動リンク5/25修正
-        $proto = preg_replace("/(https?|ftp|news)(:\/\/[[A-Za-z0-9]\+\$\;\?\.%,!#~*\/:@&=_-]+)/", "<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>", $proto);
+        $proto = preg_replace("/(https?|ftp|news)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/", "<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>", $proto);
         return $proto;
     }
 

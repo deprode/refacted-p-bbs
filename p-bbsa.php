@@ -284,7 +284,7 @@ function pastLog($data)
     $pcom = preg_replace("/(&gt;)([^<]*)/i", "<font color=999999>\\1\\2</font>", $pcom);
     // URL自動リンク
     if ($autolink) {
-        $pcom = autoLink($pcom);
+        $pcom = ViewModel::autoLink($pcom);
     }
 
     $dat .= "<hr>[$pno] <font color=\"#009900\"><b>$psub</b></font> Name：<b>$pname</b> <small>Date：$pdate</small> $purl<br><ul>$pcom</ul><!-- $pho -->\n";
@@ -295,13 +295,6 @@ function pastLog($data)
         while (list(, $val) = each($past)) {fputs($np, $val);}
     }
     fclose($np);
-}
-
-function autoLink($proto)
-{
-    //自動リンク5/25修正
-    $proto = preg_replace("/(https?|ftp|news)(:\/\/[[A-Za-z0-9]\+\$\;\?\.%,!#~*\/:@&=_-]+)/", "<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>", $proto);
-    return $proto;
 }
 
 //エラーフォーマット
