@@ -287,7 +287,7 @@ function usrdel()
     }
 
     // ログを更新
-    Log::removeRes($logfile, $no);
+    Log::removePost($logfile, $no);
 }
 
 function admin()

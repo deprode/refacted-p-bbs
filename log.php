@@ -99,11 +99,11 @@ class Log
     }
 
     /**
-     * ユーザーによる削除
-     * @param $filename ログファイル名
-     * @param $no 削除するレス番号
+     * 投稿の削除
+     * @param string $filename ログファイル名
+     * @param integer $no 削除するレス番号
      */
-    public static function removeRes($filename, $no)
+    public static function removePost($filename, $no)
     {
         $res = Log::getDataFromFile($filename);
         if ($res === false) {
