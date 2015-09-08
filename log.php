@@ -122,4 +122,34 @@ class Log
         // 該当レス以外のログで上書き
         Log::renewlog($filename, $pushlog);
     }
+
+    /**
+     * 複数の投稿を削除
+     * @param string $filename ログファイル名
+     * @param array $no 削除するレス番号の配列
+     */
+    public static function removePosts($filename, $no_arr)
+    {
+        $res = Log::getDataFromFile($filename);
+        if ($res === false) {
+            return;
+        }
+
+        if (!is_array($no_arr)) {
+            return;
+        }
+
+        // 削除情報をマッチングし更新
+        $delall = file($filename);
+
+        for ($i = 0; $i < count($delall); $i++) {
+            list($no) = explode("<>", $delall[$i]);
+            if (in_array($no, $no_arr)) {
+                $delall[$i] = "";
+            }
+        }
+        // ログを更新
+        Log::renewlog($filename, $delall);
+
+    }
 }

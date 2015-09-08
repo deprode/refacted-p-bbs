@@ -290,49 +290,37 @@ function usrdel()
     Log::removePost($logfile, $no);
 }
 
+function adminAuth($password)
+{
+    $admin_pass = Config::get('admin_pass');
+
+    if (isset($password) && $password != $admin_pass) {
+        return false;
+    }
+    return true;
+}
+
+function adminDel()
+{
+    $logfile = Config::get('logfile');
+    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
+    $del = array_filter($del, 'is_string');
+
+    // 削除処理
+    Log::removePosts($logfile, $del);
+}
+
 function admin()
 {
     $tpl = new Template();
     $config = new Config();
 
-    $admin_pass = $config->getConfig('admin_pass');
+    $apass = filter_input(INPUT_POST, 'apass');
     $logfile = $config->getConfig('logfile');
     $body = $config->getConfig('body');
     $title1 = $config->getConfig('title1');
 
-    $apass = filter_input(INPUT_POST, 'apass');
-    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
-    $del = array_filter($del, 'is_string');
-
-    if (isset($apass) && $apass != $admin_pass) {
-        error('パスワードが違います');
-    }
-
-    // 削除処理
-    if (is_array($del)) {
-        // 削除情報をマッチングし更新
-        $delall = file($logfile);
-
-        for ($i = 0; $i < count($delall); $i++) {
-            list($no) = explode("<>", $delall[$i]);
-            if (in_array($no, $del)) {
-                $delall[$i] = "";
-            }
-
-        }
-        // ログを更新
-        Log::renewlog($logfile, $delall);
-    }
-
-    // 削除画面を表示
-    $tpl->c = $config;
-    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
-
-    $tpl->apass = $apass;
-    $tpl->del = $del;
-
-
-    // ログを削除モードで表示
+    // 削除モードのログを読み込み
     $delmode = file($logfile);
     $logs = [];
     if (is_array($delmode)) {
@@ -359,6 +347,13 @@ function admin()
             $logs[] = $log;
         }
     }
+
+    // 削除画面を表示
+    $tpl->c = $config;
+    $tpl->script_name = $_SERVER['SCRIPT_NAME'];
+
+    $tpl->apass = $apass;
+    $tpl->del = $del;
 
     $tpl->delmode = $logs;
     $tpl->show('template/admin.tpl.php');
@@ -570,7 +565,13 @@ class Main
                 break;
             case 'admin':
                 // *管理
-                admin();
+                $apass = filter_input(INPUT_POST, 'apass');
+                if (adminAuth($apass)) {
+                    adminDel();
+                    admin();
+                } else {
+                    error('パスワードが違います');
+                }
                 break;
             case 'usrdel':
                 // *ユーザー権限による書き込みの削除
