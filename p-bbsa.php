@@ -77,16 +77,12 @@ function regist()
     $sub = filter_input(INPUT_POST, 'sub');
     $url = filter_input(INPUT_POST, 'url');
     $com = filter_input(INPUT_POST, 'com');
-    $password = filter_input(INPUT_POST, 'password');
 
-    //ログ書き込み
-    $logfile = Config::get('logfile');
-
-    if ($_SERVER['REQUEST_METHOD'] != "POST") {
+    if (Security::equalRequestMethod('POST')) {
         error("不正な投稿をしないで下さい");
     }
 
-    if (Config::get('GAIBU') && !preg_match("/" . $_SERVER['SCRIPT_NAME'] . "/i", getenv("HTTP_REFERER"))) {
+    if (Config::get('GAIBU') && Security::checkReferrer()) {
         error("外部から書き込みできません");
     }
 

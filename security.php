@@ -19,4 +19,17 @@ class Security
         }
         return false;
     }
+
+    public static function equalRequestMethod($method)
+    {
+        $request = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+        return $request === $method;
+    }
+
+    public static function checkReferrer()
+    {
+        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+        $referrer = filter_input(INPUT_SERVER, 'HTTP_REFERER');
+        return !preg_match("/" . $script_name . "/i", $referrer);
+    }
 }
