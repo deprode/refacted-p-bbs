@@ -1,11 +1,6 @@
 <?php
 
-require_once 'validation.php';
-require_once 'config.php';
-require_once 'template.php';
-require_once 'log.php';
-require_once 'viewmodel.php';
-require_once 'security.php';
+require 'autoload.php';
 
 // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
 require_once "rbl.php";
