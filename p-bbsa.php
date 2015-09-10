@@ -20,7 +20,7 @@ if (Security::existHost($remote_addr, $no_hosts)) {
     exit;
 }
 
-function validationPost()
+function validationPost($name, $sub, $com)
 {
     $error_msg = '';
 
