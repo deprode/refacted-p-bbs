@@ -93,27 +93,28 @@ function regist()
         error($error_msg);
     }
 
+    // 連続投稿のチェック
     $times = time();
+    $w_regist = Config::get('w_regist');
+    if ($w_regist && $times - $ttime < $w_regist) {
+        error("連続投稿はもうしばらく時間を置いてからお願い致します");
+    }
 
+    // 二重投稿のチェック
+    $logfile = Config::get('logfile');
     $check = file($logfile);
-    $tail = sizeof($check);
 
     list($tno, $tdate, $tname, $tmail, $tsub, $tcom, , , $tpw, $ttime) = explode("<>", $check[0]);
     if ($name == $tname && $com == $tcom) {
         error("二重投稿は禁止です");
     }
 
-    $w_regist = Config::get('w_regist');
-    if ($w_regist && $times - $ttime < $w_regist) {
-        error("連続投稿はもうしばらく時間を置いてからお願い致します");
-    }
-
     // 記事Noを採番
     $no = $tno + 1;
 
     // ホスト名を取得
-    $host = getenv("REMOTE_HOST");
-    $addr = $_SERVER['REMOTE_ADDR'];
+    $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
+    $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
     if ($host == "" || $host == $addr) {
         //gethostbyddrが使えるか
         $host = @gethostbyaddr($addr);
@@ -318,6 +319,10 @@ class Main
         $vm = new ViewModel();
         $config = new Config();
         $htmlw = $config->getConfig('htmlw');
+        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+        if (!$script_name) {
+            exit;
+        }
         // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
         switch ($mode) {
             case 'regist':
@@ -333,7 +338,7 @@ class Main
                 }
 
                 // *転送
-                header("Location: {$_SERVER['SCRIPT_NAME']}");
+                header("Location: {$script_name}");
                 break;
             case 'admin':
                 // *管理
@@ -354,7 +359,7 @@ class Main
                 }
 
                 // *転送
-                header("Location: {$_SERVER['SCRIPT_NAME']}");
+                header("Location: {$script_name}");
                 break;
             case 'past':
                 // 過去ログモード
