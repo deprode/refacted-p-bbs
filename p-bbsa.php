@@ -51,7 +51,7 @@ function validationPost($name, $sub, $com)
     }
 
     // 禁止ワード
-    $no_word = Config::get('maxn');
+    $no_word = Config::get('no_word');
     if (is_array($no_word)) {
         foreach ($no_word as $fuck) {
             if (preg_match("/$fuck/", $com)) {
@@ -68,6 +68,8 @@ function validationPost($name, $sub, $com)
 
         }
     }
+
+    return $error_msg;
 }
 
 function regist()
@@ -78,7 +80,7 @@ function regist()
     $url = filter_input(INPUT_POST, 'url');
     $com = filter_input(INPUT_POST, 'com');
 
-    if (Security::equalRequestMethod('POST')) {
+    if (!Security::equalRequestMethod('POST')) {
         error("不正な投稿をしないで下さい");
     }
 
@@ -118,6 +120,7 @@ function regist()
     }
 
     // 削除キーを暗号化
+    $password = filter_input(INPUT_POST, 'password');
     if ($password) {
         $PW = password_hash($password, PASSWORD_DEFAULT);
     }
