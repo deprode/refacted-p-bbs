@@ -281,8 +281,12 @@ class Main
                 break;
             case 'usrdel':
                 // *ユーザー権限による書き込みの削除
-                $this->usrdel();
-                // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
+                try {
+                    $this->usrdel();
+                } catch (Exception $e) {
+                    $vm->error($e->getMessage());
+                }
+                // トップページをHTMLに書き出す
                 if ($htmlw) {
                     $this->MakeHtml();
                 }
@@ -308,21 +312,21 @@ class Main
 
         //ユーザー削除
         if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
-            error("削除Noまたは削除キーが入力モレです");
+            throw new Exception("削除Noまたは削除キーが入力モレです");
         }
 
         $pass = Log::searchDelPass($logfile, $no);
 
         if (isset($pass) === false) {
-            error("該当記事が見当たりません");
+            throw new Exception("該当記事が見当たりません");
         } else if ($pass === "") {
-            error("該当記事には削除キーが設定されていません");
+            throw new Exception("該当記事には削除キーが設定されていません");
         }
 
         // 削除キーを照合
         $match = password_verify($pwd, $pass);
         if (($match != $pass)) {
-            error("削除キーが違います");
+            throw new Exception("削除キーが違います");
         }
 
         // ログを更新
