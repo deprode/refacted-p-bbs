@@ -45,6 +45,28 @@ class Post
         return $this->post[$key];
     }
 
+    public static function buildPost($data)
+    {
+        if (!is_string($data)) {
+            return null;
+        }
+
+        list($no, $date, $name, $email, $sub, $body, $url, $host, $password, $unixtime) = explode("<>", $data);
+
+        return new Post([
+                    'no' => $no,
+                    'date' => $date,
+                    'name' => $name,
+                    'email' => $email,
+                    'subject' => $sub,
+                    'body' => $body,
+                    'url' => $url,
+                    'host' => $host,
+                    'delpass' => $password,
+                    'unixtime' => $unixtime
+                ]);
+    }
+
     public function getPostStr()
     {
         return sprintf("%d<>%s<>%s<>%s<>%s<>%s<>%s<>%s<>%s<>%d\n",
