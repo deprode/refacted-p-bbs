@@ -76,16 +76,16 @@ function regist()
     $com = filter_input(INPUT_POST, 'com');
 
     if (!Security::equalRequestMethod('POST')) {
-        error("不正な投稿をしないで下さい");
+        throw new Exception("不正な投稿をしないで下さい");
     }
 
     if (Config::get('GAIBU') && Security::checkReferrer()) {
-        error("外部から書き込みできません");
+        throw new Exception("外部から書き込みできません");
     }
 
     $error_msg = validationPost($name, $sub, $com);
     if (mb_strlen($error_msg) > 0) {
-        error($error_msg);
+        throw new Exception($error_msg);
     }
 
     // 二重投稿のチェック
@@ -94,14 +94,14 @@ function regist()
 
     list($tno, $tdate, $tname, $tmail, $tsub, $tcom, , , $tpw, $ttime) = explode("<>", $check[0]);
     if ($name == $tname && $com == $tcom) {
-        error("二重投稿は禁止です");
+        throw new Exception("二重投稿は禁止です");
     }
 
     // 連続投稿のチェック
     $times = time();
     $w_regist = Config::get('w_regist');
     if ($w_regist && $times - $ttime < $w_regist) {
-        error("連続投稿はもうしばらく時間を置いてからお願い致します");
+        throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
     }
 
     // 記事Noを採番
@@ -138,7 +138,7 @@ function regist()
     $temp = str_replace("\n", "\n" . "a", $com);
     $str_cnt = strlen($temp) - strlen($com);
     if ($str_cnt > Config::get('maxline')) {
-        error("行数が長すぎますっ！");
+        throw new Exception("行数が長すぎますっ！");
     }
 
     $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
@@ -222,18 +222,6 @@ function pastLog($data)
     fclose($np);
 }
 
-//エラーフォーマット
-function error($mes)
-{
-    $tpl = new Template();
-
-    $tpl->mes = nl2br($mes);
-
-    $tpl->show('template/error.tpl.php');
-
-    exit;
-}
-
 /*=====================
     メイン
 ======================*/
@@ -260,7 +248,11 @@ class Main
                 }
 
                 // *ログ書き込み
-                regist();
+                try {
+                    regist();
+                } catch (Exception $e) {
+                    $vm->error($e->getMessage());
+                }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
                     $this->MakeHtml();
