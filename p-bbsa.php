@@ -169,75 +169,6 @@ function regist()
     Log::renewlog($logfile, $new_log); //ログ更新
 }
 
-function usrdel()
-{
-    $pwd = filter_input(INPUT_POST, 'pwd');
-    $no = filter_input(INPUT_POST, 'no');
-    $logfile = Config::get('logfile');
-
-    //ユーザー削除
-    if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
-        error("削除Noまたは削除キーが入力モレです");
-    }
-
-    $pass = Log::searchDelPass($logfile, $no);
-
-    if (isset($pass) === false) {
-        error("該当記事が見当たりません");
-    } else if ($pass === "") {
-        error("該当記事には削除キーが設定されていません");
-    }
-
-    // 削除キーを照合
-    $match = password_verify($pwd, $pass);
-    if (($match != $pass)) {
-        error("削除キーが違います");
-    }
-
-    // ログを更新
-    Log::removePost($logfile, $no);
-}
-
-function adminAuth($password)
-{
-    $admin_pass = Config::get('admin_pass');
-
-    if (isset($password) && $password != $admin_pass) {
-        return false;
-    }
-    return true;
-}
-
-function adminDel()
-{
-    $logfile = Config::get('logfile');
-    $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
-    $del = array_filter($del, 'is_string');
-
-    // 削除処理
-    Log::removePosts($logfile, $del);
-}
-
-function MakeHtml()
-{
-    $vm = new ViewModel();
-    $config = new Config();
-    $html_file = $config->getConfig('html_file');
-
-    // HTML生成
-    ob_start();
-    $vm->main();
-    $buf = ob_get_contents();
-    ob_end_clean();
-
-    // バッファをHTMLファイルに書き込み
-    $hp = @fopen($html_file, "w");
-    flock($hp, LOCK_EX);
-    fputs($hp, $buf);
-    fflush($hp);
-    flock($hp, LOCK_UN);
-    fclose($hp);
-}
 
 function pastLog($data)
 {
@@ -320,7 +251,8 @@ class Main
         if (!$script_name) {
             exit;
         }
-        // *$modeはregist、admin,userdel,past,その他（通常時）の4つ。
+
+        // ルーティング
         switch ($mode) {
             case 'regist':
                 if (check_spam()) {
@@ -329,9 +261,9 @@ class Main
 
                 // *ログ書き込み
                 regist();
-                // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
+                // トップページをHTMLに書き出す
                 if ($htmlw) {
-                    MakeHtml();
+                    $this->MakeHtml();
                 }
 
                 // *転送
@@ -340,8 +272,8 @@ class Main
             case 'admin':
                 // *管理
                 $apass = filter_input(INPUT_POST, 'apass');
-                if (adminAuth($apass)) {
-                    adminDel();
+                if ($this->adminAuth($apass)) {
+                    $this->adminDel();
                     $vm->admin();
                 } else {
                     $vm->error('パスワードが違います');
@@ -349,10 +281,10 @@ class Main
                 break;
             case 'usrdel':
                 // *ユーザー権限による書き込みの削除
-                usrdel();
+                $this->usrdel();
                 // *トップページをHTMLに書き出す場合はMakeHtml()でHTMLファイル作成
                 if ($htmlw) {
-                    MakeHtml();
+                    $this->MakeHtml();
                 }
 
                 // *転送
@@ -366,6 +298,76 @@ class Main
                 $vm->main();
                 break;
         }
+    }
+
+    function usrdel()
+    {
+        $pwd = filter_input(INPUT_POST, 'pwd');
+        $no = filter_input(INPUT_POST, 'no');
+        $logfile = Config::get('logfile');
+
+        //ユーザー削除
+        if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
+            error("削除Noまたは削除キーが入力モレです");
+        }
+
+        $pass = Log::searchDelPass($logfile, $no);
+
+        if (isset($pass) === false) {
+            error("該当記事が見当たりません");
+        } else if ($pass === "") {
+            error("該当記事には削除キーが設定されていません");
+        }
+
+        // 削除キーを照合
+        $match = password_verify($pwd, $pass);
+        if (($match != $pass)) {
+            error("削除キーが違います");
+        }
+
+        // ログを更新
+        Log::removePost($logfile, $no);
+    }
+
+    function adminAuth($password)
+    {
+        $admin_pass = Config::get('admin_pass');
+
+        if (isset($password) && $password != $admin_pass) {
+            return false;
+        }
+        return true;
+    }
+
+    function adminDel()
+    {
+        $logfile = Config::get('logfile');
+        $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
+        $del = array_filter($del, 'is_string');
+
+        // 削除処理
+        Log::removePosts($logfile, $del);
+    }
+
+    function MakeHtml()
+    {
+        $vm = new ViewModel();
+        $config = new Config();
+        $html_file = $config->getConfig('html_file');
+
+        // HTML生成
+        ob_start();
+        $vm->main();
+        $buf = ob_get_contents();
+        ob_end_clean();
+
+        // バッファをHTMLファイルに書き込み
+        $hp = @fopen($html_file, "w");
+        flock($hp, LOCK_EX);
+        fputs($hp, $buf);
+        fflush($hp);
+        flock($hp, LOCK_UN);
+        fclose($hp);
     }
 }
 
