@@ -170,36 +170,6 @@ function regist()
 }
 
 
-function buildPastLogHtml($data = '')
-{
-    if (empty($data)) {
-        return '';
-    }
-
-    // 投稿データをパース
-    $post = Post::buildPost($data);
-
-    // URLをHTMLリンク形式に変換
-    if ($post->url) {
-        $post->url = "<a href=\"http://{$post->url}\" target=\"_blank\">HP</a>";
-    }
-    // メールアドレスをHTMLリンク形式に変換
-    if ($post->email) {
-        $post->name = "<a href=\"mailto:{$post->email}\">$post->name</a>";
-    }
-    // 返信（＞）がある時は色変更
-    $post->body = preg_replace("/(&gt;)([^<]*)/i", "<font color=999999>\\1\\2</font>", $post->body);
-    // URL自動リンク
-    if ($autolink) {
-        $post->body = ViewModel::autoLink($post->body);
-    }
-
-    // 追加で書き込むHTMLの作成
-    $dat = "<hr>[{$post->no}] <font color=\"#009900\"><b>{$post->subject}</b></font> Name：<b>{$post->name}</b> <small>Date：{$post->date}</small> {$post->url}<br><ul>{$post->body}</ul><!-- {$post->host} -->";
-
-    return $dat;
-}
-
 // 過去ログ作成
 function pastLog($data)
 {
@@ -208,39 +178,31 @@ function pastLog($data)
     $past_line = Config::get('past_line');
     $autolink = Config::get('autolink');
 
+    // 過去ログのindex番号を読み取り
+    $count = Pastlog::readPastIndexLog($past_no);
     // 作成する過去ログファイルの名前を作成
-    $fc = @fopen($past_no, "r") or die(__LINE__ . $past_no . "が開けません");
-    $count = fgets($fc, 10);
-    fclose($fc);
-    $pastfile = $past_dir . "index" . $count . ".html";
+    $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
 
     // 過去ログの読み込み
     if (file_exists($pastfile)) {
         $past = file($pastfile);
     }
 
-    // 1行=1投稿なので、書き込み可能行数を超えていたら次のファイルを作成する
+    // 1行=1投稿なので、書き込み可能行数を超えていたら過去ログindex番号をインクリメントする
     if (sizeof($past) > $past_line) {
         $count++;
-        $pf = fopen($past_no, "w");
-        fputs($pf, $count);
-        fclose($pf);
-        $pastfile = $past_dir . "index" . $count . ".html";
+        Pastlog::writePastIndexLog($past_no, $count);
+        // ファイルパスも作り直す
+        $pastfile = Pastlog::buildPastnoFilePath($count);
+        // ゼロから作るのでログを初期化する
         $past = "";
     }
 
     // 追加で書き込むHTMLの作成
-    $dat = buildPastLogHtml($data);
+    $dat = Pastlog::buildPastLogHtml($data);
 
     // ログ(.html)の書き込み
-    $np = fopen($pastfile, "w");
-    fputs($np, $dat);
-    if ($past) {
-        foreach ($past as $val) {
-            fputs($np, $val);
-        }
-    }
-    fclose($np);
+    Pastlog::writePastLog($pastfile, $dat, $past);
 }
 
 /*=====================
