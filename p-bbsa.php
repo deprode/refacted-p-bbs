@@ -371,5 +371,3 @@ $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(
 
 $main = new Main();
 $main->index($mode);
-
-?>
