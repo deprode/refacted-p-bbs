@@ -220,15 +220,17 @@ function adminDel()
 
 function MakeHtml()
 {
-    //HTML生成
+    $vm = new ViewModel();
     $config = new Config();
     $html_file = $config->getConfig('html_file');
 
+    // HTML生成
     ob_start();
-    ShowHtml();
+    $vm->main();
     $buf = ob_get_contents();
     ob_end_clean();
 
+    // バッファをHTMLファイルに書き込み
     $hp = @fopen($html_file, "w");
     flock($hp, LOCK_EX);
     fputs($hp, $buf);
