@@ -88,13 +88,6 @@ function regist()
         error($error_msg);
     }
 
-    // 連続投稿のチェック
-    $times = time();
-    $w_regist = Config::get('w_regist');
-    if ($w_regist && $times - $ttime < $w_regist) {
-        error("連続投稿はもうしばらく時間を置いてからお願い致します");
-    }
-
     // 二重投稿のチェック
     $logfile = Config::get('logfile');
     $check = file($logfile);
@@ -102,6 +95,13 @@ function regist()
     list($tno, $tdate, $tname, $tmail, $tsub, $tcom, , , $tpw, $ttime) = explode("<>", $check[0]);
     if ($name == $tname && $com == $tcom) {
         error("二重投稿は禁止です");
+    }
+
+    // 連続投稿のチェック
+    $times = time();
+    $w_regist = Config::get('w_regist');
+    if ($w_regist && $times - $ttime < $w_regist) {
+        error("連続投稿はもうしばらく時間を置いてからお願い致します");
     }
 
     // 記事Noを採番
