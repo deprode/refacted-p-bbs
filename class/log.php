@@ -50,6 +50,28 @@ class Log
     }
 
     /**
+     * 過去ログから最新N番目の書き込みを返す
+     * @param $filename ファイル名
+     * @param $no 最新の書き込みからのインデックス（0番目から）
+     * @return Post or null Postクラスのインスタンス、読み込みエラー・インデックス範囲外の時はnull
+     */
+    public static function getResDataForIndex($filename, $index)
+    {
+        $data_arr = Log::getDataFromFile($filename);
+        if ($data_arr === false) {
+            return null;
+        }
+
+        // 範囲外チェック
+        if ($index >= count($data_arr)) {
+            return null;
+        }
+
+        // Post形式にして返す
+        return Post::buildPost($data_arr[$index]);
+    }
+
+    /**
      * ログを更新する
      * @param $filename ログファイル名
      * @param $arrline 書き換えるデータ

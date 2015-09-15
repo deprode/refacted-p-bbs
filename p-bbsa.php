@@ -67,6 +67,27 @@ function validationPost($name, $sub, $com)
     return $error_msg;
 }
 
+function checkDuplicatePost($name, $com, Post $post)
+{
+    return ($name === $post->name && $com === $post->body);
+}
+
+function checkShortTimePost($w_regist, $time, $prev_time)
+{
+    return ($w_regist && ($time - $prev_time) < $w_regist);
+}
+
+// 最大行チェック
+function overMaxline($com, $maxline = 0)
+{
+    // \n数える
+    $com = str_replace("\r\n", "\r", $com);
+    $com = str_replace("\r", "\n", $com);
+    $count = preg_match_all('/\n/', $com);
+
+    return ($count > $maxline);
+}
+
 function regist()
 {
     $name = filter_input(INPUT_POST, 'name');
@@ -74,6 +95,10 @@ function regist()
     $sub = filter_input(INPUT_POST, 'sub');
     $url = filter_input(INPUT_POST, 'url');
     $com = filter_input(INPUT_POST, 'com');
+
+    /*
+     * エラー処理
+     */
 
     if (!Security::equalRequestMethod('POST')) {
         throw new Exception("不正な投稿をしないで下さい");
@@ -88,24 +113,36 @@ function regist()
         throw new Exception($error_msg);
     }
 
-    // 二重投稿のチェック
+    // 1つ前の書き込みを取得
     $logfile = Config::get('logfile');
-    $check = file($logfile);
+    $prev_res = Log::getResDataForIndex($logfile, 0);
 
-    list($tno, $tdate, $tname, $tmail, $tsub, $tcom, , , $tpw, $ttime) = explode("<>", $check[0]);
-    if ($name == $tname && $com == $tcom) {
+    // 二重投稿のチェック
+    if (checkDuplicatePost($name, $com, $prev_res)) {
         throw new Exception("二重投稿は禁止です");
     }
 
     // 連続投稿のチェック
-    $times = time();
+    $now = new DateTime();
+    $nowtime = $now->format('U');
     $w_regist = Config::get('w_regist');
-    if ($w_regist && $times - $ttime < $w_regist) {
+
+    if (checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
         throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
     }
 
+    // 最大行チェック
+    if (overMaxline($com, Config::get('maxline'))) {
+        throw new Exception("行数が長すぎますっ！");
+    }
+
+
+    /*
+     * 記事整形
+     */
+
     // 記事Noを採番
-    $no = $tno + 1;
+    $no = $prev_res->no + 1;
 
     // ホスト名を取得
     $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
@@ -131,25 +168,25 @@ function regist()
     $email = str_replace("<>", "&lt;&gt;", $email);
     $url = str_replace("<>", "&lt;&gt;", $url);
 
-    //改行文字の統一。
+    // 改行文字の統一。
     $com = str_replace("\r\n", "\r", $com);
     $com = str_replace("\r", "\n", $com);
-    /* \n数える（substr_countの代わり）*/
-    $temp = str_replace("\n", "\n" . "a", $com);
-    $str_cnt = strlen($temp) - strlen($com);
-    if ($str_cnt > Config::get('maxline')) {
-        throw new Exception("行数が長すぎますっ！");
-    }
 
     $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
     $com = nl2br($com); //改行文字の前に<br>を代入する。
     $com = preg_replace("/\n/", "", $com); //\nを文字列から消す。
 
-    $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$times\n";
+    $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$nowtime\n";
 
-    //クッキー保存
+
+    // クッキー保存
     $cookvalue = implode(",", array($name, $email));
     setcookie("p_bbs", $cookvalue, time() + 14 * 24 * 3600); /* 2週間で期限切れ */
+
+
+    /*
+     * 記録
+     */
 
     $max = Config::get('max');
     $old_log = file($logfile);
@@ -193,7 +230,7 @@ function pastLog($data)
         $count++;
         Pastlog::writePastIndexLog($past_no, $count);
         // ファイルパスも作り直す
-        $pastfile = Pastlog::buildPastnoFilePath($count);
+        $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
         // ゼロから作るのでログを初期化する
         $past = "";
     }
