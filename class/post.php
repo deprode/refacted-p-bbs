@@ -59,6 +59,7 @@ class Post
 
     /**
      * ゲッター
+     * @param string $key
      */
     public function __get($key)
     {

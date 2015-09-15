@@ -61,14 +61,14 @@ class Pastlog
             $post->name = "<a href=\"mailto:{$post->email}\">$post->name</a>";
         }
         // 返信（＞）がある時は色変更
-        $post->body = preg_replace("/(&gt;)([^<]*)/i", "<font color=999999>\\1\\2</font>", $post->body);
+        $post->body = preg_replace("/(&gt;)([^<]*)/i", "<span style=\"color: #999;\">\\1\\2</span>", $post->body);
         // URL自動リンク
         if ($autolink) {
             $post->body = ViewModel::autoLink($post->body);
         }
 
         // 追加で書き込むHTMLの作成
-        $dat = "<hr>[{$post->no}] <font color=\"#009900\"><b>{$post->subject}</b></font> Name：<b>{$post->name}</b> <small>Date：{$post->date}</small> {$post->url}<br><ul>{$post->body}</ul><!-- {$post->host} -->";
+        $dat = "<hr>[{$post->no}] <span style=\"color: #009900; font-weight: bold;\">{$post->subject}</span> Name：<span style=\"font-weight: bold;\">{$post->name}</span> <span style=\"font-size: smaller;\">Date：{$post->date}</span> {$post->url}<br><div style=\"margin: 1em 0; padding: 0 0 0 40px;\">{$post->body}</div><!-- {$post->host} -->";
 
         return $dat;
     }

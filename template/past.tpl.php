@@ -17,21 +17,32 @@
     margin: 0 auto;
     text-align: center;
 }
+.small {
+    font-size: small;
+}
+.bold {
+    font-weight: bold;
+}
 </style>
 </head>
 <body <?php echo $c->body; ?>>
-    <font size=2>[<a href="<?php echo $script_name; ?>?">掲示板に戻る</a>]</font>
-    <br>
-    <center>■ 過去ログ <?php echo $pno; ?> ■<P>new←
-    <?php for ($pastkey = $count; $pastkey > 0; $pastkey--): ?>
-        <?php if ($pno == $pastkey): ?>
-            [<b><?php echo $pastkey; ?></b>]
-        <?php else: ?>
-            <a href="<?php echo $script_name; ?>?mode=past&pno=<?php echo $pastkey; ?>">[<?php echo $pastkey; ?>]</a>
-        <?php endif; ?>
-    <?php endfor; ?>
-     →old
-    </center>
+    <div class="small">
+        [<a href="<?php echo $script_name; ?>?">掲示板に戻る</a>]
+    </div>
+    <div class="center">
+        ■ 過去ログ <?php echo $pno; ?> ■
+        <p>
+            new←
+            <?php for ($pastkey = $count; $pastkey > 0; $pastkey--): ?>
+                <?php if ($pno == $pastkey): ?>
+                    [<span class="bold"><?php echo $pastkey; ?></span>]
+                <?php else: ?>
+                    <a href="<?php echo $script_name; ?>?mode=past&pno=<?php echo $pastkey; ?>">[<?php echo $pastkey; ?>]</a>
+                <?php endif; ?>
+            <?php endfor; ?>
+             →old
+        </p>
+    </div>
     <?php echo $c->past_line; ?>件ずつ表示
     <?php include $pastfile; ?>
 </body>
