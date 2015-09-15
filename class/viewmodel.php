@@ -4,10 +4,14 @@ require_once 'template.php';
 
 /**
 * ViewModelクラス
+* Viewを表示させるためにデータのロード、形成、テンプレートの表示を行う
 */
 class ViewModel
 {
-    //エラーフォーマット
+    /**
+     * エラーを表示する
+     * @param string $mes エラーメッセージ
+     */
     public static function error($mes)
     {
         $tpl = new Template();
@@ -19,6 +23,11 @@ class ViewModel
         exit;
     }
 
+    /**
+     * URLをHTML形式のリンクを作成する
+     * @param string $proto リンクに含めるURL
+     * @return string HTML形式の文字列
+     */
     public static function autoLink($proto)
     {
         //自動リンク5/25修正
@@ -26,11 +35,19 @@ class ViewModel
         return $proto;
     }
 
+    /**
+     * 文字列に含まれる改行タグを改行文字に変換する
+     * @param string $string 入力文字列
+     * @return string 変換後の文字列
+     */
     public static function br2nl($string)
     {
         return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
     }
 
+    /**
+     * 管理画面を表示する
+     */
     public function admin()
     {
         $tpl = new Template();
@@ -83,6 +100,13 @@ class ViewModel
         $tpl->show('template/admin.tpl.php');
     }
 
+    /**
+     * 掲示板のログを読み出して返す
+     * @param string $view 掲示板のログデータ
+     * @param integer $page 読み込みを開始するページ
+     * @param integer $page_def 一回で表示する件数
+     * @return array 表示に使うログ
+     */
     public static function createMain($view, $page, $page_def)
     {
         $dat = [];
@@ -144,6 +168,11 @@ class ViewModel
         return $dat;
     }
 
+    /**
+     * 引用を返す
+     * @param $logfile 掲示板の過去ログファイルのパス
+     * @param $no 引用を行う投稿番号
+     */
     public function getResMsg($logfile, $no)
     {
         //レスの場合
@@ -168,6 +197,9 @@ class ViewModel
         return [$r_sub, $r_com];
     }
 
+    /**
+     * トップページを表示する
+     */
     public function main()
     {
         $mode = filter_input(INPUT_GET, 'mode');
@@ -213,6 +245,9 @@ class ViewModel
         $tpl->show('template/index.tpl.php');
     }
 
+    /**
+     * 過去ログを表示する
+     */
     public function pastView()
     {
         $pno = filter_input(INPUT_GET, 'pno');
