@@ -35,7 +35,7 @@ class Post
 
     public function __set($key, $val)
     {
-        if (in_array($val, self::$post_default)) {
+        if (array_key_exists($key, self::$post_default)) {
             $this->post[$key] = $val;
         }
     }
