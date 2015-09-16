@@ -46,7 +46,7 @@
         <font size="+1" color="#D01166"><b><?php echo $dat[$i]['sub'] ?></b></font><br>
         　Name：<font color="#007000"><b>
         <?php if (isset($dat[$i]['email']) && !empty($dat[$i]['email'])): ?>
-            <a href="mailto:<?php echo $dat[$i]['name'] ?>"><?php echo $dat[$i]['name'] ?></a>
+            <a href="mailto:<?php echo $dat[$i]['email'] ?>"><?php echo $dat[$i]['name'] ?></a>
         <?php else: ?>
             <?php echo $dat[$i]['name'] ?>
         <?php endif; ?>
