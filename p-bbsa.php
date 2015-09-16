@@ -67,25 +67,25 @@ function validationPost($name, $sub, $com)
     return $error_msg;
 }
 
-function checkDuplicatePost($name, $com, Post $post)
+function getHost()
 {
-    return ($name === $post->name && $com === $post->body);
+    $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
+    $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
+    if ($host == "" || $host == $addr) {
+        //gethostbyddrが使えるか
+        $host = @gethostbyaddr($addr);
+    }
+
+    return $host;
 }
 
-function checkShortTimePost($w_regist, $time, $prev_time)
+function saveUserData($name, $email)
 {
-    return ($w_regist && ($time - $prev_time) < $w_regist);
-}
+    $now = new DateTime();
+    $limit = 14 * 24 * 3600; /* 2週間で期限切れ */
 
-// 最大行チェック
-function overMaxline($com, $maxline = 0)
-{
-    // \n数える
-    $com = str_replace("\r\n", "\r", $com);
-    $com = str_replace("\r", "\n", $com);
-    $count = preg_match_all('/\n/', $com);
-
-    return ($count > $maxline);
+    $cookvalue = implode(",", array($name, $email));
+    setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
 }
 
 function regist()
@@ -118,7 +118,7 @@ function regist()
     $prev_res = Log::getResDataForIndex($logfile, 0);
 
     // 二重投稿のチェック
-    if (checkDuplicatePost($name, $com, $prev_res)) {
+    if (Validation::checkDuplicatePost($name, $com, $prev_res)) {
         throw new Exception("二重投稿は禁止です");
     }
 
@@ -127,12 +127,12 @@ function regist()
     $nowtime = $now->format('U');
     $w_regist = Config::get('w_regist');
 
-    if (checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
+    if (Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
         throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
     }
 
     // 最大行チェック
-    if (overMaxline($com, Config::get('maxline'))) {
+    if (Validation::overMaxline($com, Config::get('maxline'))) {
         throw new Exception("行数が長すぎますっ！");
     }
 
@@ -145,12 +145,7 @@ function regist()
     $no = $prev_res->no + 1;
 
     // ホスト名を取得
-    $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
-    $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
-    if ($host == "" || $host == $addr) {
-        //gethostbyddrが使えるか
-        $host = @gethostbyaddr($addr);
-    }
+    $host = getHost();
 
     // 削除キーを暗号化
     $password = filter_input(INPUT_POST, 'password');
@@ -180,9 +175,7 @@ function regist()
 
 
     // クッキー保存
-    $cookvalue = implode(",", array($name, $email));
-    setcookie("p_bbs", $cookvalue, time() + 14 * 24 * 3600); /* 2週間で期限切れ */
-
+    saveUserData($name, $email);
 
     /*
      * 記録
