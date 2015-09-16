@@ -245,26 +245,26 @@ class Main
 {
     function index($mode)
     {
-        $vm = new ViewModel();
+        $view_model = new ViewModel();
         $config = new Config();
         $htmlw = $config->getConfig('htmlw');
         $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
         if (!$script_name) {
-            exit;
+            throw new Exception("スクリプト名を取得できません。");
         }
 
         // ルーティング
         switch ($mode) {
             case 'regist':
                 if (check_spam()) {
-                    die("指定されたIPからは投稿できません。");
+                    throw new Exception("指定されたIPからは投稿できません。");
                 }
 
                 // *ログ書き込み
                 try {
                     regist();
                 } catch (Exception $e) {
-                    $vm->error($e->getMessage());
+                    $view_model->error($e->getMessage());
                 }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
@@ -279,9 +279,9 @@ class Main
                 $apass = filter_input(INPUT_POST, 'apass');
                 if ($this->adminAuth($apass)) {
                     $this->adminDel();
-                    $vm->admin();
+                    $view_model->admin();
                 } else {
-                    $vm->error('パスワードが違います');
+                    $view_model->error('パスワードが違います');
                 }
                 break;
             case 'usrdel':
@@ -289,7 +289,7 @@ class Main
                 try {
                     $this->usrdel();
                 } catch (Exception $e) {
-                    $vm->error($e->getMessage());
+                    $view_model->error($e->getMessage());
                 }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
@@ -301,10 +301,10 @@ class Main
                 break;
             case 'past':
                 // 過去ログモード
-                $vm->pastView();
+                $view_model->pastView();
                 break;
             default:
-                $vm->main();
+                $view_model->main();
                 break;
         }
     }
@@ -360,27 +360,31 @@ class Main
 
     function MakeHtml()
     {
-        $vm = new ViewModel();
+        $view_model = new ViewModel();
         $config = new Config();
         $html_file = $config->getConfig('html_file');
 
         // HTML生成
         ob_start();
-        $vm->main();
+        $view_model->main();
         $buf = ob_get_contents();
         ob_end_clean();
 
         // バッファをHTMLファイルに書き込み
-        $hp = @fopen($html_file, "w");
-        flock($hp, LOCK_EX);
-        fputs($hp, $buf);
-        fflush($hp);
-        flock($hp, LOCK_UN);
-        fclose($hp);
+        $handle = @fopen($html_file, "w");
+        flock($handle, LOCK_EX);
+        fputs($handle, $buf);
+        fflush($handle);
+        flock($handle, LOCK_UN);
+        fclose($handle);
     }
 }
 
 $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
 
 $main = new Main();
-$main->index($mode);
+try {
+    $main->index($mode);
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
