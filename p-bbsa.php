@@ -88,6 +88,45 @@ function saveUserData($name, $email)
     setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
 }
 
+function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
+{
+    $now = new DateTime();
+    $nowtime = $now->format('U');
+
+    // 記事Noを採番
+    $no = $prev->no + 1;
+
+    // ホスト名を取得
+    $host = getHost();
+
+    // 削除キーを暗号化
+    if ($password) {
+        $PW = password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
+    $url = preg_replace("/^http:\/\//", "", $url);
+
+    // ログの区切り文字である<>を参照文字に置換
+    $com = str_replace("<>", "&lt;&gt;", $com);
+    $sub = str_replace("<>", "&lt;&gt;", $sub);
+    $name = str_replace("<>", "&lt;&gt;", $name);
+    $email = str_replace("<>", "&lt;&gt;", $email);
+    $url = str_replace("<>", "&lt;&gt;", $url);
+
+    // 改行文字の統一。
+    $com = str_replace("\r\n", "\r", $com);
+    $com = str_replace("\r", "\n", $com);
+
+    $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
+    $com = nl2br($com); //改行文字の前に<br>を代入する。
+    $com = preg_replace("/\n/", "", $com); //\nを文字列から消す。
+
+    $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$nowtime\n";
+
+    return $new_msg;
+}
+
 function regist()
 {
     $name = filter_input(INPUT_POST, 'name');
@@ -95,11 +134,11 @@ function regist()
     $sub = filter_input(INPUT_POST, 'sub');
     $url = filter_input(INPUT_POST, 'url');
     $com = filter_input(INPUT_POST, 'com');
+    $password = filter_input(INPUT_POST, 'password');
 
     /*
-     * エラー処理
+     * セキュリティ処理
      */
-
     if (!Security::equalRequestMethod('POST')) {
         throw new Exception("不正な投稿をしないで下さい");
     }
@@ -108,6 +147,9 @@ function regist()
         throw new Exception("外部から書き込みできません");
     }
 
+    /**
+     * バリデーション
+     */
     $error_msg = validationPost($name, $sub, $com);
     if (mb_strlen($error_msg) > 0) {
         throw new Exception($error_msg);
@@ -137,42 +179,8 @@ function regist()
     }
 
 
-    /*
-     * 記事整形
-     */
-
-    // 記事Noを採番
-    $no = $prev_res->no + 1;
-
-    // ホスト名を取得
-    $host = getHost();
-
-    // 削除キーを暗号化
-    $password = filter_input(INPUT_POST, 'password');
-    if ($password) {
-        $PW = password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
-    $url = preg_replace("/^http:\/\//", "", $url);
-
-    // ログの区切り文字である<>を参照文字に置換
-    $com = str_replace("<>", "&lt;&gt;", $com);
-    $sub = str_replace("<>", "&lt;&gt;", $sub);
-    $name = str_replace("<>", "&lt;&gt;", $name);
-    $email = str_replace("<>", "&lt;&gt;", $email);
-    $url = str_replace("<>", "&lt;&gt;", $url);
-
-    // 改行文字の統一。
-    $com = str_replace("\r\n", "\r", $com);
-    $com = str_replace("\r", "\n", $com);
-
-    $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
-    $com = nl2br($com); //改行文字の前に<br>を代入する。
-    $com = preg_replace("/\n/", "", $com); //\nを文字列から消す。
-
-    $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$nowtime\n";
-
+    // 記事整形
+    $new_msg = buildMessageData($prev_res, $name, $email, $sub, $url, $com, $password);
 
     // クッキー保存
     saveUserData($name, $email);
@@ -198,7 +206,6 @@ function regist()
     }
     Log::renewlog($logfile, $new_log); //ログ更新
 }
-
 
 // 過去ログ作成
 function pastLog($data)
