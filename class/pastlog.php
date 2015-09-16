@@ -43,7 +43,7 @@ class Pastlog
         return $past_dir . "index" . $count . ".html";
     }
 
-    public static function buildPastLogHtml($data = '')
+    public static function buildPastLogHtml($data = '', $autolink = false)
     {
         if (empty($data)) {
             return '';

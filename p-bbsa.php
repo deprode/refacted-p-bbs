@@ -229,7 +229,7 @@ function pastLog($data)
     }
 
     // 追加で書き込むHTMLの作成
-    $dat = Pastlog::buildPastLogHtml($data);
+    $dat = Pastlog::buildPastLogHtml($data, $autolink);
 
     // ログ(.html)の書き込み
     Pastlog::writePastLog($pastfile, $dat, $past);
