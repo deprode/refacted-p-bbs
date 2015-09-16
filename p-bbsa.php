@@ -15,233 +15,6 @@ if (Security::existHost($remote_addr, $no_hosts)) {
     exit;
 }
 
-function validationPost($name, $sub, $com)
-{
-    $error_msg = '';
-
-    if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
-        $error_msg .= "禁止ワードエラー！！" . PHP_EOL;
-    }
-
-    // フォームが空かチェック
-    if (Validation::isEmpty($name)) {
-        $error_msg .= "名前が書き込まれていません" . PHP_EOL;
-    }
-    if (Validation::isEmpty($com)) {
-        $error_msg .= "本文が書き込まれていません" . PHP_EOL;
-    }
-    if (Validation::isEmpty($sub)) {
-        $sub = Config::get('mudai');
-    }
-
-    // 最大長チェック
-    if (Validation::overLength($name, Config::get('maxn'))) {
-        $error_msg .= "名前が長すぎますっ！" . PHP_EOL;
-    }
-    if (Validation::overLength($sub, Config::get('maxs'))) {
-        $error_msg .= "タイトルが長すぎますっ！" . PHP_EOL;
-    }
-    if (Validation::overLength($com, Config::get('maxv'))) {
-        $error_msg .= "本文が長すぎますっ！" . PHP_EOL;
-    }
-
-    // 禁止ワード
-    $no_word = Config::get('no_word');
-    if (is_array($no_word)) {
-        foreach ($no_word as $fuck) {
-            if (preg_match("/$fuck/", $com)) {
-                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
-            }
-
-            if (preg_match("/$fuck/", $sub)) {
-                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
-            }
-
-            if (preg_match("/$fuck/", $name)) {
-                $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
-            }
-
-        }
-    }
-
-    return $error_msg;
-}
-
-function getHost()
-{
-    $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
-    $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
-    if ($host == "" || $host == $addr) {
-        //gethostbyddrが使えるか
-        $host = @gethostbyaddr($addr);
-    }
-
-    return $host;
-}
-
-function saveUserData($name, $email)
-{
-    $now = new DateTime();
-    $limit = 14 * 24 * 3600; /* 2週間で期限切れ */
-
-    $cookvalue = implode(",", array($name, $email));
-    setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
-}
-
-function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
-{
-    $now = new DateTime();
-    $nowtime = $now->format('U');
-
-    // 記事Noを採番
-    $no = $prev->no + 1;
-
-    // ホスト名を取得
-    $host = getHost();
-
-    // 削除キーを暗号化
-    if ($password) {
-        $PW = password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
-    $url = preg_replace("/^http:\/\//", "", $url);
-
-    // ログの区切り文字である<>を参照文字に置換
-    $com = str_replace("<>", "&lt;&gt;", $com);
-    $sub = str_replace("<>", "&lt;&gt;", $sub);
-    $name = str_replace("<>", "&lt;&gt;", $name);
-    $email = str_replace("<>", "&lt;&gt;", $email);
-    $url = str_replace("<>", "&lt;&gt;", $url);
-
-    // 改行文字の統一。
-    $com = str_replace("\r\n", "\r", $com);
-    $com = str_replace("\r", "\n", $com);
-
-    $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
-    $com = nl2br($com); //改行文字の前に<br>を代入する。
-    $com = preg_replace("/\n/", "", $com); //\nを文字列から消す。
-
-    $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$nowtime\n";
-
-    return $new_msg;
-}
-
-function regist()
-{
-    $name = filter_input(INPUT_POST, 'name');
-    $email = filter_input(INPUT_POST, 'email');
-    $sub = filter_input(INPUT_POST, 'sub');
-    $url = filter_input(INPUT_POST, 'url');
-    $com = filter_input(INPUT_POST, 'com');
-    $password = filter_input(INPUT_POST, 'password');
-
-    /*
-     * セキュリティ処理
-     */
-    if (!Security::equalRequestMethod('POST')) {
-        throw new Exception("不正な投稿をしないで下さい");
-    }
-
-    if (Config::get('GAIBU') && Security::checkReferrer()) {
-        throw new Exception("外部から書き込みできません");
-    }
-
-    /**
-     * バリデーション
-     */
-    $error_msg = validationPost($name, $sub, $com);
-    if (mb_strlen($error_msg) > 0) {
-        throw new Exception($error_msg);
-    }
-
-    // 1つ前の書き込みを取得
-    $logfile = Config::get('logfile');
-    $prev_res = Log::getResDataForIndex($logfile, 0);
-
-    // 二重投稿のチェック
-    if (Validation::checkDuplicatePost($name, $com, $prev_res)) {
-        throw new Exception("二重投稿は禁止です");
-    }
-
-    // 連続投稿のチェック
-    $now = new DateTime();
-    $nowtime = $now->format('U');
-    $w_regist = Config::get('w_regist');
-
-    if (Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
-        throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
-    }
-
-    // 最大行チェック
-    if (Validation::overMaxline($com, Config::get('maxline'))) {
-        throw new Exception("行数が長すぎますっ！");
-    }
-
-
-    // 記事整形
-    $new_msg = buildMessageData($prev_res, $name, $email, $sub, $url, $com, $password);
-
-    // クッキー保存
-    saveUserData($name, $email);
-
-    /*
-     * 記録
-     */
-
-    $max = Config::get('max');
-    $old_log = file($logfile);
-    $line = sizeof($old_log);
-    $new_log[0] = $new_msg; //先頭に新記事
-    if (Config::get('past_key') && $line >= $max) {
-        //はみ出した記事を過去ログへ
-        for ($s = $max; $s <= $line; $s++) { //念の為複数行対応
-            pastLog($old_log[$s - 1]);
-        }
-    }
-
-    for ($i = 1; $i < $max; $i++) {
-        //最大記事数処理
-        $new_log[$i] = $old_log[$i - 1];
-    }
-    Log::renewlog($logfile, $new_log); //ログ更新
-}
-
-// 過去ログ作成
-function pastLog($data)
-{
-    $past_no = Config::get('past_no');
-    $past_dir = Config::get('past_dir');
-    $past_line = Config::get('past_line');
-    $autolink = Config::get('autolink');
-
-    // 過去ログのindex番号を読み取り
-    $count = Pastlog::readPastIndexLog($past_no);
-    // 作成する過去ログファイルの名前を作成
-    $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
-
-    // 過去ログの読み込み
-    if (file_exists($pastfile)) {
-        $past = file($pastfile);
-    }
-
-    // 1行=1投稿なので、書き込み可能行数を超えていたら過去ログindex番号をインクリメントする
-    if (sizeof($past) > $past_line) {
-        $count++;
-        Pastlog::writePastIndexLog($past_no, $count);
-        // ファイルパスも作り直す
-        $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
-        // ゼロから作るのでログを初期化する
-        $past = "";
-    }
-
-    // 追加で書き込むHTMLの作成
-    $dat = Pastlog::buildPastLogHtml($data, $autolink);
-
-    // ログ(.html)の書き込み
-    Pastlog::writePastLog($pastfile, $dat, $past);
-}
-
 /*=====================
     メイン
 ======================*/
@@ -269,7 +42,7 @@ class Main
 
                 // *ログ書き込み
                 try {
-                    regist();
+                    $this->regist();
                 } catch (Exception $e) {
                     $view_model->error($e->getMessage());
                 }
@@ -314,6 +87,232 @@ class Main
                 $view_model->main();
                 break;
         }
+    }
+
+    function validationPost($name, $sub, $com)
+    {
+        $error_msg = '';
+
+        if (preg_match("/(<a\b[^>]*?>|\[url(?:\s?=|\]))|href=/i", $com)) {
+            $error_msg .= "禁止ワードエラー！！" . PHP_EOL;
+        }
+
+        // フォームが空かチェック
+        if (Validation::isEmpty($name)) {
+            $error_msg .= "名前が書き込まれていません" . PHP_EOL;
+        }
+        if (Validation::isEmpty($com)) {
+            $error_msg .= "本文が書き込まれていません" . PHP_EOL;
+        }
+        if (Validation::isEmpty($sub)) {
+            $sub = Config::get('mudai');
+        }
+
+        // 最大長チェック
+        if (Validation::overLength($name, Config::get('maxn'))) {
+            $error_msg .= "名前が長すぎますっ！" . PHP_EOL;
+        }
+        if (Validation::overLength($sub, Config::get('maxs'))) {
+            $error_msg .= "タイトルが長すぎますっ！" . PHP_EOL;
+        }
+        if (Validation::overLength($com, Config::get('maxv'))) {
+            $error_msg .= "本文が長すぎますっ！" . PHP_EOL;
+        }
+
+        // 禁止ワード
+        $no_word = Config::get('no_word');
+        if (is_array($no_word)) {
+            foreach ($no_word as $fuck) {
+                if (preg_match("/$fuck/", $com)) {
+                    $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+                }
+
+                if (preg_match("/$fuck/", $sub)) {
+                    $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+                }
+
+                if (preg_match("/$fuck/", $name)) {
+                    $error_msg .= "使用できない言葉が含まれています！" . PHP_EOL;
+                }
+
+            }
+        }
+
+        return $error_msg;
+    }
+
+    function getHost()
+    {
+        $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
+        $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
+        if ($host == "" || $host == $addr) {
+            //gethostbyddrが使えるか
+            $host = @gethostbyaddr($addr);
+        }
+
+        return $host;
+    }
+
+    function saveUserData($name, $email)
+    {
+        $now = new DateTime();
+        $limit = 14 * 24 * 3600; /* 2週間で期限切れ */
+
+        $cookvalue = implode(",", array($name, $email));
+        setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
+    }
+
+    function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
+    {
+        $now = new DateTime();
+        $nowtime = $now->format('U');
+
+        // 記事Noを採番
+        $no = $prev->no + 1;
+
+        // ホスト名を取得
+        $host = $this->getHost();
+
+        // 削除キーを暗号化
+        if ($password) {
+            $PW = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
+        $url = preg_replace("/^http:\/\//", "", $url);
+
+        // ログの区切り文字である<>を参照文字に置換
+        $com = str_replace("<>", "&lt;&gt;", $com);
+        $sub = str_replace("<>", "&lt;&gt;", $sub);
+        $name = str_replace("<>", "&lt;&gt;", $name);
+        $email = str_replace("<>", "&lt;&gt;", $email);
+        $url = str_replace("<>", "&lt;&gt;", $url);
+
+        // 改行文字の統一。
+        $com = str_replace("\r\n", "\r", $com);
+        $com = str_replace("\r", "\n", $com);
+
+        $com = preg_replace("/\n((　| |\t)*\n){3,}/", "\n", $com); //連続する空行を一行
+        $com = nl2br($com); //改行文字の前に<br>を代入する。
+        $com = preg_replace("/\n/", "", $com); //\nを文字列から消す。
+
+        $new_msg = "$no<>$now<>$name<>$email<>$sub<>$com<>$url<>$host<>$PW<>$nowtime\n";
+
+        return $new_msg;
+    }
+
+    function regist()
+    {
+        $name = filter_input(INPUT_POST, 'name');
+        $email = filter_input(INPUT_POST, 'email');
+        $sub = filter_input(INPUT_POST, 'sub');
+        $url = filter_input(INPUT_POST, 'url');
+        $com = filter_input(INPUT_POST, 'com');
+        $password = filter_input(INPUT_POST, 'password');
+
+        /*
+         * セキュリティ処理
+         */
+        if (!Security::equalRequestMethod('POST')) {
+            throw new Exception("不正な投稿をしないで下さい");
+        }
+
+        if (Config::get('GAIBU') && Security::checkReferrer()) {
+            throw new Exception("外部から書き込みできません");
+        }
+
+        /**
+         * バリデーション
+         */
+        $error_msg = $this->validationPost($name, $sub, $com);
+        if (mb_strlen($error_msg) > 0) {
+            throw new Exception($error_msg);
+        }
+
+        // 1つ前の書き込みを取得
+        $logfile = Config::get('logfile');
+        $prev_res = Log::getResDataForIndex($logfile, 0);
+
+        // 二重投稿のチェック
+        if (Validation::checkDuplicatePost($name, $com, $prev_res)) {
+            throw new Exception("二重投稿は禁止です");
+        }
+
+        // 連続投稿のチェック
+        $now = new DateTime();
+        $nowtime = $now->format('U');
+        $w_regist = Config::get('w_regist');
+
+        if (Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
+            throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
+        }
+
+        // 最大行チェック
+        if (Validation::overMaxline($com, Config::get('maxline'))) {
+            throw new Exception("行数が長すぎますっ！");
+        }
+
+
+        // 記事整形
+        $new_msg = $this->buildMessageData($prev_res, $name, $email, $sub, $url, $com, $password);
+
+        // クッキー保存
+        $this->saveUserData($name, $email);
+
+        /*
+         * 記録
+         */
+        $max = Config::get('max');
+        $old_log = file($logfile);
+        $line = sizeof($old_log);
+        $new_log[0] = $new_msg; //先頭に新記事
+        if (Config::get('past_key') && $line >= $max) {
+            //はみ出した記事を過去ログへ
+            for ($s = $max; $s <= $line; $s++) { //念の為複数行対応
+                $this->pastLog($old_log[$s - 1]);
+            }
+        }
+
+        for ($i = 1; $i < $max; $i++) {
+            //最大記事数処理
+            $new_log[$i] = $old_log[$i - 1];
+        }
+        Log::renewlog($logfile, $new_log); //ログ更新
+    }
+
+    // 過去ログ作成
+    function pastLog($data)
+    {
+        $past_no = Config::get('past_no');
+        $past_dir = Config::get('past_dir');
+        $past_line = Config::get('past_line');
+        $autolink = Config::get('autolink');
+
+        // 過去ログのindex番号を読み取り
+        $count = Pastlog::readPastIndexLog($past_no);
+        // 作成する過去ログファイルの名前を作成
+        $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
+
+        // 過去ログの読み込み
+        if (file_exists($pastfile)) {
+            $past = file($pastfile);
+        }
+
+        // 1行=1投稿なので、書き込み可能行数を超えていたら過去ログindex番号をインクリメントする
+        if (sizeof($past) > $past_line) {
+            $count++;
+            Pastlog::writePastIndexLog($past_no, $count);
+            // ファイルパスも作り直す
+            $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
+            // ゼロから作るのでログを初期化する
+            $past = "";
+        }
+
+        // 追加で書き込むHTMLの作成
+        $dat = Pastlog::buildPastLogHtml($data, $autolink);
+
+        // ログ(.html)の書き込み
+        Pastlog::writePastLog($pastfile, $dat, $past);
     }
 
     function usrdel()
