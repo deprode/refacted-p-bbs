@@ -87,9 +87,6 @@ class Main
         if (Validation::isEmpty($com)) {
             $error_msg .= "本文が書き込まれていません" . PHP_EOL;
         }
-        if (Validation::isEmpty($sub)) {
-            $sub = Config::get('mudai');
-        }
 
         // 最大長チェック
         if (Validation::overLength($name, Config::get('maxn'))) {
@@ -159,6 +156,10 @@ class Main
         // 削除キーを暗号化
         if ($password) {
             $PW = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        if (Validation::isEmpty($sub)) {
+            $sub = Config::get('mudai');
         }
 
         $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
