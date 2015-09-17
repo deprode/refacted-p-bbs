@@ -219,11 +219,11 @@ class ViewModel
         $tpl->script_name = $script_name;
 
         // * cookieには名前とメールが入っているので呼び出してるっぽい
-        $htmlw = $config->getConfig('htmlw');
+        $htmlw = $config->get('htmlw');
         if (!$htmlw && isset($p_bbs)) {
             list($r_name, $r_mail) = explode(",", $p_bbs);
         }
-        $logfile = $config->getConfig('logfile');
+        $logfile = $config->get('logfile');
         if ($mode == "resmsg") {
             list($r_sub, $r_com) = $this->getResMsg($logfile, $no);
         }
@@ -234,7 +234,7 @@ class ViewModel
         $tpl->r_com = $r_com;
         $tpl->r_pass = $r_pass;
 
-        $page_def = $config->getConfig('page_def');
+        $page_def = $config->get('page_def');
         $view = file($logfile);
         $tpl->dat = $this->createMain($view, $page, $page_def);
 
@@ -256,8 +256,8 @@ class ViewModel
         $tpl = new Template();
         $config = new Config();
 
-        $past_no = $config->getConfig('past_no');
-        $past_dir = $config->getConfig('past_dir');
+        $past_no = $config->get('past_no');
+        $past_dir = $config->get('past_dir');
 
         $pno = htmlspecialchars($pno);
 

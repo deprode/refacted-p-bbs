@@ -10,7 +10,7 @@ class Main
     {
         $view_model = new ViewModel();
         $config = new Config();
-        $htmlw = $config->getConfig('htmlw');
+        $htmlw = $config->get('htmlw');
         $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
         if (!$script_name) {
             throw new Exception("スクリプト名を取得できません。");
@@ -352,7 +352,7 @@ class Main
     {
         $view_model = new ViewModel();
         $config = new Config();
-        $html_file = $config->getConfig('html_file');
+        $html_file = $config->get('html_file');
 
         // HTML生成
         ob_start();

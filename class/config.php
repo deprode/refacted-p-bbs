@@ -58,9 +58,4 @@ class Config
     {
         return self::_getConfig($key);
     }
-
-    public static function getConfig($key)
-    {
-        return self::_getConfig($key);
-    }
 }
