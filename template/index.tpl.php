@@ -68,6 +68,7 @@
         <a href="<?php echo $script_name; ?>?page=<?php echo "" . ($page - $c->page_def); ?>">&lt;&lt;</a>
     <?php endif; ?>
 
+    <?php if ($c->page_def): ?>
     <?php for ($i = 0; ($i * $c->page_def) < $total; $i++): ?>
         <?php if (intval($page, 10) === ($i * $c->page_def)): ?>
             <?php echo ($i+1); ?>
@@ -75,6 +76,7 @@
             <a href="<?php echo $script_name; ?>?page=<?php echo ($i * $c->page_def); ?>"><?php echo ($i+1); ?></a>
         <?php endif; ?>
     <?php endfor; ?>
+    <?php endif; ?>
 
     <?php if ($total > ($page + $c->page_def)): ?>
         <a href="<?php echo $script_name; ?>?page=<?php echo ($page + $c->page_def); ?>">&gt;&gt;</a>

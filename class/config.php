@@ -1,7 +1,5 @@
 <?php
 
-const CONFIG_FILE_NAME = 'config.ini';
-
 /**
 * 設定、設定ファイル読み込み
 */
