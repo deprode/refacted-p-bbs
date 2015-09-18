@@ -6,6 +6,10 @@
 */
 class Main
 {
+    /**
+     * ルーティングを行う
+     * @param string $mode 分岐用クエリ文字列
+     */
     function index($mode)
     {
         $view_model = new ViewModel();
@@ -72,6 +76,13 @@ class Main
         }
     }
 
+    /**
+     * 投稿内容を検査する
+     * @param string $name 名前
+     * @param string $sub 題名
+     * @param string $com 投稿内容
+     * @return string エラーメッセージ
+     */
     function validationPost($name, $sub, $com)
     {
         $error_msg = '';
@@ -121,6 +132,10 @@ class Main
         return $error_msg;
     }
 
+    /**
+     * ホスト名を取得する
+     * @return string アクセス元のホスト名
+     */
     function getHost()
     {
         $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
@@ -133,6 +148,11 @@ class Main
         return $host;
     }
 
+    /**
+     * ユーザ名とメールアドレスをクッキーに保存する
+     * @param string $name 名前
+     * @param string $email Eメールアドレス
+     */
     function saveUserData($name, $email)
     {
         $now = new DateTime();
@@ -142,6 +162,17 @@ class Main
         setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
     }
 
+    /**
+     * 投稿内容から保存するデータを作成する
+     * @param Post $prev 前回の投稿内容
+     * @param string $email Eメールアドレス
+     * @param string $name 名前
+     * @param string $sub 題名
+     * @param string $url URL
+     * @param string $com 本文
+     * @param string $password パスワード
+     * @return string ログに保存可能な投稿データ
+     */
     function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
     {
         $now = new DateTime();
@@ -185,6 +216,9 @@ class Main
         return $new_msg;
     }
 
+    /**
+     * 投稿内容を記録する
+     */
     function regist()
     {
         $name = filter_input(INPUT_POST, 'name');
@@ -264,7 +298,10 @@ class Main
         Log::renewlog($logfile, $new_log); //ログ更新
     }
 
-    // 過去ログ作成
+    /**
+     * 過去ログ作成
+     * @param string $data 過去ログデータ（追加分）
+     */
     function pastLog($data)
     {
         $past_no = Config::get('past_no');
@@ -299,6 +336,9 @@ class Main
         Pastlog::writePastLog($pastfile, $dat, $past);
     }
 
+    /**
+     * ユーザーによる削除を行う
+     */
     function usrdel()
     {
         $pwd = filter_input(INPUT_POST, 'pwd');
@@ -328,6 +368,11 @@ class Main
         Log::removePost($logfile, $no);
     }
 
+    /**
+     * 管理者パスワードを検証する
+     * @param stirng $password パスワード
+     * @return boolean パスワードが一致していたらtrue,一致していなければfalse
+     */
     function adminAuth($password)
     {
         $admin_pass = Config::get('admin_pass');
@@ -338,6 +383,9 @@ class Main
         return true;
     }
 
+    /**
+     * 管理者による投稿の削除を行う
+     */
     function adminDel()
     {
         $logfile = Config::get('logfile');
@@ -348,6 +396,9 @@ class Main
         Log::removePosts($logfile, $del);
     }
 
+    /**
+     * メイン表示をHtmlに書き出す
+     */
     function MakeHtml()
     {
         $view_model = new ViewModel();

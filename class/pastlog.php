@@ -1,17 +1,26 @@
 <?php
 
 /**
-* 過去ログ
+* 過去ログとインデックスファイル、それらに関わる文字列操作を行う
 */
 class Pastlog
 {
+    // 過去ログのディレクトリ
     private static $past_dir;
 
+    /**
+     * コンストラクタ
+     */
     function __construct()
     {
         self::$past_dir = Config::get('past_dir');
     }
 
+    /**
+     * 過去ログのインデックスを読み込む
+     * @param string $filepath 過去ログのファイルパス
+     * @return string インデックス
+     */
     public static function readPastIndexLog($filepath)
     {
         $fc = @fopen($filepath, "r");
@@ -24,6 +33,11 @@ class Pastlog
         return $count;
     }
 
+    /**
+     * 過去ログのインデックスを書き込む
+     * @param string $filepath 過去ログのファイルパス
+     * @param string $count インデックス
+     */
     public static function writePastIndexLog($filepath, $count)
     {
         $fp = fopen($filepath, "w");
@@ -34,6 +48,13 @@ class Pastlog
         fclose($fp);
     }
 
+    /**
+     * 過去ログのファイルパスを作る
+     * 過去ログのファイルパスは、./{$past_dir}/index{$count}.htmlになるように組み立てる
+     * @param integer $count 過去ログ番号
+     * @param string $past_dir 過去ログのディレクトリ
+     * @return string 過去ログのファイルパス
+     */
     public static function buildPastnoFilePath($count, $past_dir)
     {
         if (!is_numeric($count)) {
@@ -43,6 +64,12 @@ class Pastlog
         return $past_dir . "index" . $count . ".html";
     }
 
+    /**
+     * 投稿データを参考にHtmlログを作成する
+     * @param string $data 投稿データ
+     * @param boolean $autolink 本文のURLをaタグで囲むか
+     * @return string 過去ログ形式のHtmlデータ
+     */
     public static function buildPastLogHtml($data = '', $autolink = false)
     {
         if (empty($data)) {
@@ -73,7 +100,12 @@ class Pastlog
         return $dat;
     }
 
-
+    /**
+     * 過去ログを書き込む
+     * @param string $filepath ログのファイルパス
+     * @param string $dat 新しく書き込むログ
+     * @param string $past （書き込み最大数を調整済みの）古いデータ
+     */
     public static function writePastLog($filepath, $dat, $past)
     {
         $np = fopen($filepath, "w");

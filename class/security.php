@@ -5,6 +5,13 @@
 */
 class Security
 {
+    /**
+     * 配列に該当のホストが入っているか調べる
+     * IPをホストに変換して、指定されたホストが入っているか検索する
+     * @param string $remote_addr アクセス元のIPアドレス
+     * @param array $hosts ホスト一覧
+     * @return boolean ホストが一覧から見つかったらtrue,なければfalse
+     */
     public static function existHost($remote_addr, $hosts = null) {
         if (isset($hosts) || !is_array($hosts)) {
             return false;
@@ -20,12 +27,22 @@ class Security
         return false;
     }
 
+    /**
+     * リクエストメソッドが指定されたものと同一か調べる
+     * @param string $method 指定するメソッド（GET,POSTなど）
+     * @param boolean 同一であればtrue、そうでなければfalse
+     */
     public static function equalRequestMethod($method)
     {
         $request = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
         return $request === $method;
     }
 
+    /**
+     * 外部から投稿されていないかチェック
+     * 注：リファラは偽装される可能性があるのでこれだけでは不十分
+     * @return 外部から投稿されていればtrue,そうでなければfalse
+     */
     public static function checkReferrer()
     {
         $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
