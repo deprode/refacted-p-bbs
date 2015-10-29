@@ -1,0 +1,12 @@
+{
+    "name": "root/refacted-p-bbs",
+    "authors": [
+        {
+            "name": "deprode",
+            "email": "sensitively+github@gmail.com"
+        }
+    ],
+    "require": {
+        "codeception/codeception": "*"
+    }
+}
