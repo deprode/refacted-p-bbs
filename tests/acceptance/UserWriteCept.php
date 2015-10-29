@@ -13,7 +13,7 @@ $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
 $I->see('P-BBS');
 $I->see('テスト', 'html/body/span[2]/b/a/text()');
-$I->see('mailto:example@example.com', 'html/body/span[5]/b/a/@href');
+$I->see('example@example.com', 'html/body/span[2]/b/a/@href');
 $I->see('テストタイトル', 'html/body/span[1]/b');
 $I->see('テスト
 これはテストです。', 'html/body/blockquote[1]/tt');

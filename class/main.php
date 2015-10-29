@@ -110,13 +110,13 @@ class Main
      * @param string $password パスワード
      * @return string ログに保存可能な投稿データ
      */
-    function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
+    function buildMessageData($prev, $name, $email, $sub, $url, $com, $password)
     {
         $now = new DateTime();
         $nowtime = $now->format('U');
 
         // 記事Noを採番
-        $no = $prev->no + 1;
+        $no = ($prev) ? $prev->no + 1 : 1;
 
         // ホスト名を取得
         $host = $this->getHost();
@@ -189,7 +189,7 @@ class Main
         $prev_res = Log::getResDataForIndex($logfile, 0);
 
         // 二重投稿のチェック
-        if (Validation::checkDuplicatePost($name, $com, $prev_res)) {
+        if ($prev_res && Validation::checkDuplicatePost($name, $com, $prev_res)) {
             throw new Exception("二重投稿は禁止です");
         }
 
