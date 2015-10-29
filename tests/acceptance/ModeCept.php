@@ -9,7 +9,8 @@ $I->amOnPage('/index.php?mode=regist');
 $I->see('エラー');
 
 $I->amOnPage('/index.php?mode=past');
-$I->see('■ 過去ログ 1 ■');
+$I->see('エラー');
+$I->see('過去ログがみつかりません', '.message');
 
 $I->amOnPage('/index.php?mode=admin');
 $I->see('P-BBS');
