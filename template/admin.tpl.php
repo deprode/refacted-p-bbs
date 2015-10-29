@@ -75,13 +75,13 @@
                     </td>
                 </tr>
         <?php endforeach; ?>
-    <?php endif; ?>
             </table>
             <p>
                 <input type="submit" value="削除する">
                 <input type="reset" value="リセット">
             </p>
         </form>
+    <?php endif; ?>
     </center>
 </body>
 </html>
