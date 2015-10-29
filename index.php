@@ -30,9 +30,9 @@ if (Security::existHost($remote_addr, $no_hosts)) {
 ======================*/
 $mode = (isset($_GET['mode'])) ? filter_input(INPUT_GET, 'mode') : filter_input(INPUT_POST, 'mode');
 
-$main = new Main();
+$route = new Router();
 try {
-    $main->index($mode);
+    $route->index($mode);
 } catch (Exception $e) {
     echo $e->getMessage();
 }
