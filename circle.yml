@@ -1,0 +1,15 @@
+machine:
+  timezone:
+    Asia/Tokyo
+  php:
+    version:
+      5.6.5
+
+dependencies:
+  post:
+    - php -S localhost:8000:
+          background: true
+
+test:
+  override:
+    - ./vendor/bin/codecept run

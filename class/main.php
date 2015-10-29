@@ -6,74 +6,11 @@
 */
 class Main
 {
-    /**
-     * ルーティングを行う
-     * @param string $mode 分岐用クエリ文字列
-     */
-    function index($mode)
+    public $vm;
+
+    public function __construct()
     {
-        $view_model = new ViewModel();
-        $config = new Config();
-        $htmlw = $config->get('htmlw');
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-        if (!$script_name) {
-            throw new Exception("スクリプト名を取得できません。");
-        }
-
-        // ルーティング
-        switch ($mode) {
-            case 'regist':
-                if (check_spam()) {
-                    throw new Exception("指定されたIPからは投稿できません。");
-                }
-
-                // *ログ書き込み
-                try {
-                    $this->regist();
-                } catch (Exception $e) {
-                    $view_model->error($e->getMessage());
-                }
-                // トップページをHTMLに書き出す
-                if ($htmlw) {
-                    $this->MakeHtml();
-                }
-
-                // *転送
-                header("Location: {$script_name}");
-                break;
-            case 'admin':
-                // *管理
-                $apass = filter_input(INPUT_POST, 'apass');
-                if ($this->adminAuth($apass)) {
-                    $this->adminDel();
-                    $view_model->admin();
-                } else {
-                    $view_model->error('パスワードが違います');
-                }
-                break;
-            case 'usrdel':
-                // *ユーザー権限による書き込みの削除
-                try {
-                    $this->usrdel();
-                } catch (Exception $e) {
-                    $view_model->error($e->getMessage());
-                }
-                // トップページをHTMLに書き出す
-                if ($htmlw) {
-                    $this->MakeHtml();
-                }
-
-                // *転送
-                header("Location: {$script_name}");
-                break;
-            case 'past':
-                // 過去ログモード
-                $view_model->pastView();
-                break;
-            default:
-                $view_model->main();
-                break;
-        }
+        $this->vm = new ViewModel();
     }
 
     /**
@@ -173,13 +110,13 @@ class Main
      * @param string $password パスワード
      * @return string ログに保存可能な投稿データ
      */
-    function buildMessageData(Post $prev, $name, $email, $sub, $url, $com, $password)
+    function buildMessageData($prev, $name, $email, $sub, $url, $com, $password)
     {
         $now = new DateTime();
         $nowtime = $now->format('U');
 
         // 記事Noを採番
-        $no = $prev->no + 1;
+        $no = ($prev) ? $prev->no + 1 : 1;
 
         // ホスト名を取得
         $host = $this->getHost();
@@ -252,7 +189,7 @@ class Main
         $prev_res = Log::getResDataForIndex($logfile, 0);
 
         // 二重投稿のチェック
-        if (Validation::checkDuplicatePost($name, $com, $prev_res)) {
+        if ($prev_res && Validation::checkDuplicatePost($name, $com, $prev_res)) {
             throw new Exception("二重投稿は禁止です");
         }
 
