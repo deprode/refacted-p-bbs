@@ -10,10 +10,11 @@ date_default_timezone_set('Asia/Tokyo');
 header('X-FRAME-OPTIONS: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 
-const CONFIG_FILE_NAME = 'config.ini';
+$settings = require __DIR__.'/settings.php';
+$config_file_name = $settings['config']['path'];
 
-if (!is_readable(CONFIG_FILE_NAME)) {
-    echo "設定ファイル(" . CONFIG_FILE_NAME . ")が読み込めません。";
+if (!is_readable($config_file_name)) {
+    echo "設定ファイル(" . $config_file_name . ")が読み込めません。";
     exit;
 }
 
