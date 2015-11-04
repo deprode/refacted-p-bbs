@@ -64,7 +64,7 @@ class ViewModel
         if (is_array($delmode)) {
             foreach ($delmode as $l => $val) {
                 list($no, $date, $name, $email, $sub, $com, ,
-                    $host, , , , , $time, ) = explode("<>", $val);
+                    $host, , $time) = explode("<>", $val);
 
                 list($date, $dmy) = split("\(", $date);
                 if ($email) {
@@ -94,7 +94,6 @@ class ViewModel
         $tpl->script_name = $script_name;
 
         $tpl->apass = $apass;
-        $tpl->del = $del;
 
         $tpl->delmode = $logs;
         $tpl->show('template/admin.tpl.php');
@@ -110,6 +109,7 @@ class ViewModel
     public static function createMain($view, $page, $page_def)
     {
         $dat = [];
+        $config = new Config();
 
         // ログファイルを読み出し、件数を数える
         $total = sizeof($view);
@@ -121,7 +121,7 @@ class ViewModel
         $st = $start + 1;
 
         $p = 0;
-        for ($s = $start; $s < $end && $p < count($view); $s++) {
+        for ($s = $start; $s < $end && $p < count($view) && $s < count($view); $s++) {
             if (!$view[$s]) {
                 break;
             }
@@ -140,10 +140,12 @@ class ViewModel
             $com = nl2br($com);
 
             // URL自動リンク
+            $autolink = $config->get('autolink');
             if ($autolink) {
                 $com = ViewModel::autoLink($com);
             }
             // Host表示形式
+            $hostview = $config->get('hostview');
             if ($hostview == 1) {
                 $host = "<!--$host-->";
             } elseif ($hostview == 2) {

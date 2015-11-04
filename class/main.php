@@ -122,6 +122,7 @@ class Main
         $host = $this->getHost();
 
         // 削除キーを暗号化
+        $PW = '';
         if ($password) {
             $PW = password_hash($password, PASSWORD_DEFAULT);
         }
@@ -198,7 +199,7 @@ class Main
         $nowtime = $now->format('U');
         $w_regist = Config::get('w_regist');
 
-        if (Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
+        if ($prev_res && Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
             throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
         }
 
@@ -228,10 +229,10 @@ class Main
             }
         }
 
-        for ($i = 1; $i < $max; $i++) {
-            //最大記事数処理
-            $new_log[$i] = $old_log[$i - 1];
-        }
+        //最大記事数処理
+        $log_data = $old_log;
+        array_splice($log_data, $max-1);
+        $new_log = array_merge($new_log, $log_data);
         Log::renewlog($logfile, $new_log); //ログ更新
     }
 
@@ -252,6 +253,7 @@ class Main
         $pastfile = Pastlog::buildPastnoFilePath($count, $past_dir);
 
         // 過去ログの読み込み
+        $past = [];
         if (file_exists($pastfile)) {
             $past = file($pastfile);
         }

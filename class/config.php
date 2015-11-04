@@ -12,7 +12,7 @@ class Config
      * コンストラクタ
      * @param $string filename 設定ファイル名（ファイルパス）
      */
-    function __construct($filename = CONFIG_FILE_NAME)
+    function __construct($filename = null)
     {
         self::initConfig($filename);
     }
@@ -21,8 +21,13 @@ class Config
      * 設定情報の初期化
      * @param string $filename 設定ファイル名（ファイルパス）
      */
-    private static function initConfig($filename = CONFIG_FILE_NAME)
+    private static function initConfig($filename = null)
     {
+        if (!isset($filename)) {
+            $settings = require __DIR__.'/../settings.php';
+            $filename = $settings['config']['path'];
+        }
+
         self::$config = parse_ini_file($filename);
         if (self::$config === false) {
             throw new Exception("設定ファイルが読み込めません。書式とエンコードを確認してください。");
