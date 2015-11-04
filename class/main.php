@@ -229,10 +229,10 @@ class Main
             }
         }
 
-        for ($i = 1; $i < $max; $i++) {
-            //最大記事数処理
-            $new_log[$i] = $old_log[$i - 1];
-        }
+        //最大記事数処理
+        $log_data = $old_log;
+        array_splice($log_data, $max-1);
+        $new_log = array_merge($new_log, $log_data);
         Log::renewlog($logfile, $new_log); //ログ更新
     }
 

@@ -64,7 +64,7 @@ class ViewModel
         if (is_array($delmode)) {
             foreach ($delmode as $l => $val) {
                 list($no, $date, $name, $email, $sub, $com, ,
-                    $host, , , , , $time, ) = explode("<>", $val);
+                    $host, , $time) = explode("<>", $val);
 
                 list($date, $dmy) = split("\(", $date);
                 if ($email) {
@@ -121,7 +121,7 @@ class ViewModel
         $st = $start + 1;
 
         $p = 0;
-        for ($s = $start; $s < $end && $p < count($view); $s++) {
+        for ($s = $start; $s < $end && $p < count($view) && $s < count($view); $s++) {
             if (!$view[$s]) {
                 break;
             }
