@@ -112,7 +112,7 @@ class Main
      */
     function buildMessageData($prev, $name, $email, $sub, $url, $com, $password)
     {
-        $now = new DateTime();
+        $now = new DateTime(null, new DateTimeZone("Asia/Tokyo"));
         $nowtime = $now->format('U');
 
         // 記事Noを採番
@@ -131,7 +131,7 @@ class Main
             $sub = Config::get('mudai');
         }
 
-        $now = gmdate("Y/m/d(D) H:i", time() + 9 * 60 * 60);
+        $now = $now->format("Y/m/d(D) H:i");
         $url = preg_replace("/^http:\/\//", "", $url);
 
         // ログの区切り文字である<>を参照文字に置換
