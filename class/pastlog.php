@@ -13,7 +13,8 @@ class Pastlog
      */
     function __construct()
     {
-        self::$past_dir = Config::get('past_dir');
+        $config = new Config();
+        self::$past_dir = $config->get('past_dir');
     }
 
     /**
@@ -95,7 +96,7 @@ class Pastlog
         }
 
         // 追加で書き込むHTMLの作成
-        $dat = "<hr>[{$post->no}] <span style=\"color: #009900; font-weight: bold;\">{$post->subject}</span> Name：<span style=\"font-weight: bold;\">{$post->name}</span> <span style=\"font-size: smaller;\">Date：{$post->date}</span> {$post->url}<br><div style=\"margin: 1em 0; padding: 0 0 0 40px;\">{$post->body}</div><!-- {$post->host} -->";
+        $dat = "<hr>[{$post->no}] <span style=\"color: #009900; font-weight: bold;\">{$post->subject}</span> Name：<span style=\"font-weight: bold;\">{$post->name}</span> <span style=\"font-size: smaller;\">Date：{$post->date}</span> {$post->url}<br><div style=\"margin: 1em 0; padding: 0 0 0 40px;\">{$post->body}</div><!-- {$post->host} -->" . PHP_EOL;
 
         return $dat;
     }
