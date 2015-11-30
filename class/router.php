@@ -37,16 +37,16 @@ class Router
                 // *ログ書き込み
                 try {
                     $this->main->regist();
+                    // トップページをHTMLに書き出す
+                    if ($htmlw) {
+                        $this->main->MakeHtml();
+                    }
+
+                    // *転送
+                    header("Location: {$script_name}");
                 } catch (Exception $e) {
                     $this->main->vm->error($e->getMessage());
                 }
-                // トップページをHTMLに書き出す
-                if ($htmlw) {
-                    $this->main->MakeHtml();
-                }
-
-                // *転送
-                header("Location: {$script_name}");
                 break;
             case 'admin':
                 // *管理
@@ -75,10 +75,18 @@ class Router
                 break;
             case 'past':
                 // 過去ログモード
-                $this->main->vm->pastView();
+                try {
+                    $this->main->vm->pastView();
+                } catch (Exception $e) {
+                    $this->main->vm->error($e->getMessage());
+                }
                 break;
             default:
-                $this->main->vm->main();
+                try {
+                    $this->main->vm->main();
+                } catch (Exception $e) {
+                    $this->main->vm->error($e->getMessage());
+                }
                 break;
         }
     }

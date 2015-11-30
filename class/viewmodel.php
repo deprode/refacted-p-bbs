@@ -25,8 +25,6 @@ class ViewModel
         $tpl->mes = nl2br($mes);
 
         $tpl->show('template/error.tpl.php');
-
-        exit;
     }
 
     /**
@@ -184,7 +182,7 @@ class ViewModel
         //レスの場合
         $data = Log::getResData($logfile, $no);
         if ($data === null) {
-            ViewModel::error("該当記事が見つかりません");
+            throw new Exception("該当記事が見つかりません");
         }
 
         $sub = $data['sub'];
@@ -274,7 +272,7 @@ class ViewModel
 
         $pastfile = $past_dir . "index" . $pno . ".html";
         if (!file_exists($pastfile)) {
-            ViewModel::error("<br>過去ログがみつかりません");
+            throw new Exception("過去ログがみつかりません");
         }
 
         $tpl->pno = $pno;
