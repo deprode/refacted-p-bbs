@@ -259,7 +259,7 @@ class Main
         }
 
         // 1行=1投稿なので、書き込み可能行数を超えていたら過去ログindex番号をインクリメントする
-        if (sizeof($past) > $past_line) {
+        if (sizeof($past) >= $past_line) {
             $count++;
             Pastlog::writePastIndexLog($past_no, $count);
             // ファイルパスも作り直す
