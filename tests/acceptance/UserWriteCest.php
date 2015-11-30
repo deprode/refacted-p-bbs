@@ -127,7 +127,8 @@ class UserWriteCest
     {
         $I->wantTo('最大行数を超えた書き込みでエラー');
 
-        $str = $this->makeMaxLine(Config::get('maxline')+1);
+        $config = new Config();
+        $str = $this->makeMaxLine($config->maxline + 1);
 
         $I->amOnPage('/');
         $I->see('P-BBS');
