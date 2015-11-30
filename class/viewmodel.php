@@ -8,6 +8,12 @@ require_once 'template.php';
 */
 class ViewModel
 {
+    private $config;
+
+    public function __construct(Config $config) {
+        $this->config = $config;
+    }
+
     /**
      * エラーを表示する
      * @param string $mes エラーメッセージ
@@ -54,9 +60,9 @@ class ViewModel
 
         $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
         $apass = filter_input(INPUT_POST, 'apass');
-        $logfile = Config::get('logfile');
-        $body = Config::get('body');
-        $title1 = Config::get('title1');
+        $logfile = $this->config->get('logfile');
+        $body = $this->config->get('body');
+        $title1 = $this->config->get('title1');
 
         // 削除モードのログを読み込み
         $delmode = file($logfile);
@@ -89,8 +95,7 @@ class ViewModel
         }
 
         // 削除画面を表示
-        $config = new Config();
-        $tpl->c = $config;
+        $tpl->c = $this->config;
         $tpl->script_name = $script_name;
 
         $tpl->apass = $apass;
@@ -106,10 +111,9 @@ class ViewModel
      * @param integer $page_def 一回で表示する件数
      * @return array 表示に使うログ
      */
-    public static function createMain($view, $page, $page_def)
+    public function createMain($view, $page, $page_def)
     {
         $dat = [];
-        $config = new Config();
 
         // ログファイルを読み出し、件数を数える
         $total = sizeof($view);
@@ -140,12 +144,12 @@ class ViewModel
             $com = nl2br($com);
 
             // URL自動リンク
-            $autolink = $config->get('autolink');
+            $autolink = $this->config->get('autolink');
             if ($autolink) {
                 $com = ViewModel::autoLink($com);
             }
             // Host表示形式
-            $hostview = $config->get('hostview');
+            $hostview = $this->config->get('hostview');
             if ($hostview == 1) {
                 $host = "<!--$host-->";
             } elseif ($hostview == 2) {
@@ -215,17 +219,16 @@ class ViewModel
         $r_sub = $r_com = $r_pass = null;
 
         $tpl = new Template();
-        $config = new Config();
 
-        $tpl->c = $config;
+        $tpl->c = $this->config;
         $tpl->script_name = $script_name;
 
         // * cookieには名前とメールが入っているので呼び出してるっぽい
-        $htmlw = $config->get('htmlw');
+        $htmlw = $this->config->get('htmlw');
         if (!$htmlw && isset($p_bbs)) {
             list($r_name, $r_mail) = explode(",", $p_bbs);
         }
-        $logfile = $config->get('logfile');
+        $logfile = $this->config->get('logfile');
         if ($mode == "resmsg") {
             list($r_sub, $r_com) = $this->getResMsg($logfile, $no);
         }
@@ -236,7 +239,7 @@ class ViewModel
         $tpl->r_com = $r_com;
         $tpl->r_pass = $r_pass;
 
-        $page_def = $config->get('page_def');
+        $page_def = $this->config->get('page_def');
         $view = file($logfile);
         $tpl->dat = $this->createMain($view, $page, $page_def);
 
@@ -256,10 +259,9 @@ class ViewModel
         $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
 
         $tpl = new Template();
-        $config = new Config();
 
-        $past_no = $config->get('past_no');
-        $past_dir = $config->get('past_dir');
+        $past_no = $this->config->get('past_no');
+        $past_dir = $this->config->get('past_dir');
 
         $pno = htmlspecialchars($pno);
 
@@ -279,7 +281,7 @@ class ViewModel
         $tpl->count = $count;
         $tpl->pastfile = $pastfile;
 
-        $tpl->c = $config;
+        $tpl->c = $this->config;
         $tpl->script_name = $script_name;
         $tpl->show('template/past.tpl.php');
     }

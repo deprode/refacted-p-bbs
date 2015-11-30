@@ -30,7 +30,8 @@ class AuthDeleteCest
 
     protected function authLogin(\AcceptanceTester $I)
     {
-        $admin_pass = Config::get('admin_pass');
+        $config = new Config();
+        $admin_pass = $config->get('admin_pass');
         $I->amOnPage('/index.php?mode=admin');
         $I->fillField('apass', $admin_pass);
         $I->click('body > center > form > input[type="submit"]:nth-child(3)');

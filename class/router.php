@@ -10,8 +10,8 @@ class Router
 
     public function __construct()
     {
-        $this->main = new Main();
         $this->config = new Config();
+        $this->main = new Main($this->config);
     }
 
     /**

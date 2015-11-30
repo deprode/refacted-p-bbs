@@ -7,10 +7,12 @@
 class Main
 {
     public $vm;
+    private $config;
 
-    public function __construct()
+    public function __construct(Config $config)
     {
-        $this->vm = new ViewModel();
+        $this->config = $config;
+        $this->vm = new ViewModel($config);
     }
 
     /**
@@ -37,18 +39,18 @@ class Main
         }
 
         // 最大長チェック
-        if (Validation::overLength($name, Config::get('maxn'))) {
+        if (Validation::overLength($name, $this->config->get('maxn'))) {
             $error_msg .= "名前が長すぎますっ！" . PHP_EOL;
         }
-        if (Validation::overLength($sub, Config::get('maxs'))) {
+        if (Validation::overLength($sub, $this->config->get('maxs'))) {
             $error_msg .= "タイトルが長すぎますっ！" . PHP_EOL;
         }
-        if (Validation::overLength($com, Config::get('maxv'))) {
+        if (Validation::overLength($com, $this->config->get('maxv'))) {
             $error_msg .= "本文が長すぎますっ！" . PHP_EOL;
         }
 
         // 禁止ワード
-        $no_word = Config::get('no_word');
+        $no_word = $this->config->get('no_word');
         if (is_array($no_word)) {
             foreach ($no_word as $fuck) {
                 if (preg_match("/$fuck/", $com)) {
@@ -128,7 +130,7 @@ class Main
         }
 
         if (Validation::isEmpty($sub)) {
-            $sub = Config::get('mudai');
+            $sub = $this->config->get('mudai');
         }
 
         $now = $now->format("Y/m/d(D) H:i");
@@ -173,7 +175,7 @@ class Main
             throw new Exception("不正な投稿をしないで下さい");
         }
 
-        if (Config::get('GAIBU') && Security::checkReferrer()) {
+        if ($this->config->get('GAIBU') && Security::checkReferrer()) {
             throw new Exception("外部から書き込みできません");
         }
 
@@ -186,7 +188,7 @@ class Main
         }
 
         // 1つ前の書き込みを取得
-        $logfile = Config::get('logfile');
+        $logfile = $this->config->get('logfile');
         $prev_res = Log::getResDataForIndex($logfile, 0);
 
         // 二重投稿のチェック
@@ -197,14 +199,14 @@ class Main
         // 連続投稿のチェック
         $now = new DateTime();
         $nowtime = $now->format('U');
-        $w_regist = Config::get('w_regist');
+        $w_regist = $this->config->get('w_regist');
 
         if ($prev_res && Validation::checkShortTimePost($w_regist, $nowtime, $prev_res->unixtime)) {
             throw new Exception("連続投稿はもうしばらく時間を置いてからお願い致します");
         }
 
         // 最大行チェック
-        if (Validation::overMaxline($com, Config::get('maxline'))) {
+        if (Validation::overMaxline($com, $this->config->get('maxline'))) {
             throw new Exception("行数が長すぎますっ！");
         }
 
@@ -218,11 +220,11 @@ class Main
         /*
          * 記録
          */
-        $max = Config::get('max');
+        $max = $this->config->get('max');
         $old_log = file($logfile);
         $line = sizeof($old_log);
         $new_log[0] = $new_msg; //先頭に新記事
-        if (Config::get('past_key') && $line >= $max) {
+        if ($this->config->get('past_key') && $line >= $max) {
             //はみ出した記事を過去ログへ
             for ($s = $max; $s <= $line; $s++) { //念の為複数行対応
                 $this->pastLog($old_log[$s - 1]);
@@ -242,10 +244,10 @@ class Main
      */
     function pastLog($data)
     {
-        $past_no = Config::get('past_no');
-        $past_dir = Config::get('past_dir');
-        $past_line = Config::get('past_line');
-        $autolink = Config::get('autolink');
+        $past_no = $this->config->get('past_no');
+        $past_dir = $this->config->get('past_dir');
+        $past_line = $this->config->get('past_line');
+        $autolink = $this->config->get('autolink');
 
         // 過去ログのindex番号を読み取り
         $count = Pastlog::readPastIndexLog($past_no);
@@ -282,7 +284,7 @@ class Main
     {
         $pwd = filter_input(INPUT_POST, 'pwd');
         $no = filter_input(INPUT_POST, 'no');
-        $logfile = Config::get('logfile');
+        $logfile = $this->config->get('logfile');
 
         //ユーザー削除
         if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
@@ -314,7 +316,7 @@ class Main
      */
     function adminAuth($password)
     {
-        $admin_pass = Config::get('admin_pass');
+        $admin_pass = $this->config->get('admin_pass');
 
         if (isset($password) && $password != $admin_pass) {
             return false;
@@ -327,7 +329,7 @@ class Main
      */
     function adminDel()
     {
-        $logfile = Config::get('logfile');
+        $logfile = $this->config->get('logfile');
         $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
         $del = array_filter($del, 'is_string');
 
@@ -340,9 +342,8 @@ class Main
      */
     function MakeHtml()
     {
-        $view_model = new ViewModel();
-        $config = new Config();
-        $html_file = $config->get('html_file');
+        $view_model = new ViewModel($this->config);
+        $html_file = $this->config->get('html_file');
 
         // HTML生成
         ob_start();

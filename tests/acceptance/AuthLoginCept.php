@@ -1,6 +1,7 @@
 <?php
 $I = new AcceptanceTester($scenario);
-$admin_pass = Config::get('admin_pass');
+$config = new Config();
+$admin_pass = $config->get('admin_pass');
 $I->wantTo('管理ログインのテスト');
 
 $I->amOnPage('/index.php?mode=admin');
