@@ -34,7 +34,8 @@ class Security
      */
     public static function equalRequestMethod($method)
     {
-        $request = filter_input(INPUT_SERVER, 'REQUEST_METHOD');
+        $input = new Input();
+        $request = $input->server('REQUEST_METHOD');
         return $request === $method;
     }
 
@@ -45,8 +46,9 @@ class Security
      */
     public static function checkReferrer()
     {
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-        $referrer = filter_input(INPUT_SERVER, 'HTTP_REFERER');
+        $input = new Input();
+        $script_name = $input->server('SCRIPT_NAME');
+        $referrer = $input->server('HTTP_REFERER');
         return !preg_match("/" . $script_name . "/i", $referrer);
     }
 }

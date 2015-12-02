@@ -51,13 +51,13 @@ class ViewModel
 
     /**
      * 管理画面を表示する
+     * @param string $apass 管理用パスワード
+     * @param string $script_name スクリプト名
      */
-    public function admin()
+    public function admin($apass, $script_name)
     {
         $tpl = new Template();
 
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-        $apass = filter_input(INPUT_POST, 'apass');
         $logfile = $this->config->get('logfile');
         $body = $this->config->get('body');
         $title1 = $this->config->get('title1');
@@ -203,16 +203,14 @@ class ViewModel
 
     /**
      * トップページを表示する
+     * @param string $mode モード（レス返信を行うかチェックする）
+     * @param integer $no レス返信のときに読み込むレス番号
+     * @param integer $page 読み込みを開始するページ
+     * @param string $p_bbs ユーザー名とメールアドレス
+     * @param string $script_name スクリプト名
      */
-    public function main()
+    public function main($mode, $no, $page, $p_bbs, $script_name)
     {
-        $mode = filter_input(INPUT_GET, 'mode');
-        $no = filter_input(INPUT_GET, 'no');
-        $page = filter_input(INPUT_GET, 'page');
-
-        $p_bbs = filter_input(INPUT_COOKIE, 'p_bbs');
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-
         $r_name = $r_mail = null;
         $r_sub = $r_com = $r_pass = null;
 
@@ -250,12 +248,11 @@ class ViewModel
 
     /**
      * 過去ログを表示する
+     * @param integer $pno 過去ログ番号（index$pno.html）
+     * @param string $script_name スクリプト名
      */
-    public function pastView()
+    public function pastView($pno, $script_name)
     {
-        $pno = filter_input(INPUT_GET, 'pno');
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
-
         $tpl = new Template();
 
         $past_no = $this->config->get('past_no');
