@@ -8,10 +8,12 @@ class Main
 {
     public $vm;
     private $config;
+    private $input;
 
-    public function __construct(Config $config)
+    public function __construct(Config $config, Input $input)
     {
         $this->config = $config;
+        $this->input = $input;
         $this->vm = new ViewModel($config);
     }
 
@@ -77,8 +79,8 @@ class Main
      */
     function getHost()
     {
-        $host = filter_input(INPUT_SERVER, 'REMOTE_HOST');
-        $addr = filter_input(INPUT_SERVER, 'REMOTE_ADDR');
+        $host = $this->input->server('REMOTE_HOST');
+        $addr = $this->input->server('REMOTE_ADDR');
         if ($host == "" || $host == $addr) {
             //gethostbyddrが使えるか
             $host = @gethostbyaddr($addr);
@@ -161,12 +163,12 @@ class Main
      */
     function regist()
     {
-        $name = filter_input(INPUT_POST, 'name');
-        $email = filter_input(INPUT_POST, 'email');
-        $sub = filter_input(INPUT_POST, 'sub');
-        $url = filter_input(INPUT_POST, 'url');
-        $com = filter_input(INPUT_POST, 'com');
-        $password = filter_input(INPUT_POST, 'password');
+        $name = $this->input->post('name');
+        $email = $this->input->post('email');
+        $sub = $this->input->post('sub');
+        $url = $this->input->post('url');
+        $com = $this->input->post('com');
+        $password = $this->input->post('password');
 
         /*
          * セキュリティ処理
@@ -282,8 +284,8 @@ class Main
      */
     function usrdel()
     {
-        $pwd = filter_input(INPUT_POST, 'pwd');
-        $no = filter_input(INPUT_POST, 'no');
+        $pwd = $this->input->post('pwd');
+        $no = $this->input->post('no');
         $logfile = $this->config->get('logfile');
 
         //ユーザー削除

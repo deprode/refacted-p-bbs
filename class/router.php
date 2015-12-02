@@ -7,11 +7,13 @@ class Router
 {
     private $main;
     private $config;
+    private $input;
 
     public function __construct()
     {
         $this->config = new Config();
-        $this->main = new Main($this->config);
+        $this->input = new Input();
+        $this->main = new Main($this->config, $this->input);
     }
 
     /**
@@ -20,7 +22,7 @@ class Router
      */
     function index($mode)
     {
-        $script_name = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
+        $script_name = $this->input->server('SCRIPT_NAME');
         if (!$script_name) {
             throw new Exception("スクリプト名を取得できません。");
         }
@@ -50,10 +52,10 @@ class Router
                 break;
             case 'admin':
                 // *管理
-                $apass = filter_input(INPUT_POST, 'apass');
+                $apass = $this->input->post('apass');
                 if ($this->main->adminAuth($apass)) {
                     $this->main->adminDel();
-                    $this->main->vm->admin();
+                    $this->main->vm->admin($apass, $script_name);
                 } else {
                     $this->main->vm->error('パスワードが違います');
                 }
@@ -75,15 +77,19 @@ class Router
                 break;
             case 'past':
                 // 過去ログモード
+                $pno = $this->input->get('pno');
                 try {
-                    $this->main->vm->pastView();
+                    $this->main->vm->pastView($pno, $script_name);
                 } catch (Exception $e) {
                     $this->main->vm->error($e->getMessage());
                 }
                 break;
             default:
+                $no = $this->input->get('no');
+                $page = $this->input->get('page');
+                $p_bbs = $this->input->cookie('p_bbs');
                 try {
-                    $this->main->vm->main();
+                    $this->main->vm->main($mode, $no, $page, $p_bbs, $script_name);
                 } catch (Exception $e) {
                     $this->main->vm->error($e->getMessage());
                 }
