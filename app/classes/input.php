@@ -27,4 +27,9 @@ class Input
     {
         return filter_input(INPUT_COOKIE, $name);
     }
+
+    public function session($name)
+    {
+        return (isset($_SESSION) && isset($_SESSION[$name])) ? $_SESSION[$name] : null;
+    }
 }

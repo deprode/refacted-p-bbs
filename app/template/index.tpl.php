@@ -53,6 +53,7 @@
 <body <?php echo $c->body; ?>>
     <form action="<?php echo $script_name; ?>" method="post" accept-charset="utf-8">
         <input type="hidden" name="mode" value="regist">
+        <input type="hidden" name="token" value="<?php echo $token; ?>">
 
         <h1 class="title"><?php echo $c->title2; ?></h1>
         <hr size="1">
@@ -133,6 +134,7 @@
     <div class="right cf">
         <form method="POST" action="<?php echo $script_name; ?>">
             <input type="hidden" name="mode" value="usrdel">
+            <input type="hidden" name="token" value="<?php echo $token; ?>">
             No <input type="text" name="no" size="2">
             pass <input type="password" name="pwd" size="4" maxlength="8">
             <input type="submit" value="Del">

@@ -100,7 +100,7 @@ class Main
         $limit = 14 * 24 * 3600; /* 2週間で期限切れ */
 
         $cookvalue = implode(",", array($name, $email));
-        setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
+        setcookie("p_bbs", $cookvalue, $now->format('U') + $limit, '', '', false, true);
     }
 
     /**
@@ -179,6 +179,10 @@ class Main
 
         if ($this->config->get('GAIBU') && Security::checkReferrer()) {
             throw new Exception("外部から書き込みできません");
+        }
+
+        if (!Security::checkToken($this->input->post('token'))) {
+            throw new Exception("不正な投稿をしないで下さい");
         }
 
         /**
@@ -288,6 +292,10 @@ class Main
         $no = $this->input->post('no');
         $logfile = $this->config->get('logfile');
 
+        if (!Security::checkToken($this->input->post('token'))) {
+            throw new Exception("不正な操作が行われました");
+        }
+
         //ユーザー削除
         if (!isset($no) || empty($no) || !isset($pwd) || empty($pwd)) {
             throw new Exception("削除Noまたは削除キーが入力モレです");
@@ -331,6 +339,10 @@ class Main
      */
     function adminDel()
     {
+        if (!Security::checkToken($this->input->post('token'))) {
+            throw new Exception("不正な操作が行われました");
+        }
+
         $logfile = $this->config->get('logfile');
         $del = isset($_POST['del']) ? (array)$_POST['del'] : [];
         $del = array_filter($del, 'is_string');

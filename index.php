@@ -3,14 +3,16 @@
 require 'autoload.php';
 
 // *rbl.phpには、RealtimeBlackListサーバに問い合わせてスパム判定するcheck_spam関数がある
-require_once "rbl.php";
+require_once "app/rbl.php";
 
 date_default_timezone_set('Asia/Tokyo');
+
+session_start();
 
 header('X-FRAME-OPTIONS: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 
-$settings = require __DIR__.'/settings.php';
+$settings = require __DIR__.'/app/settings.php';
 $config_file_name = $settings['config']['path'];
 
 if (!is_readable($config_file_name)) {

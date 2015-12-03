@@ -51,4 +51,25 @@ class Security
         $referrer = $input->server('HTTP_REFERER');
         return !preg_match("/" . $script_name . "/i", $referrer);
     }
+
+    /**
+     * トークンを生成し取得する
+     */
+    public static function generateToken()
+    {
+        return base64_encode(openssl_random_pseudo_bytes(32));
+    }
+
+    /**
+     * トークンのチェック
+     */
+    public static function checkToken($token)
+    {
+        $input = new Input();
+        $session_token = $input->session('token');
+        if (!$token || $token != $session_token) {
+            return false;
+        }
+        return true;
+    }
 }

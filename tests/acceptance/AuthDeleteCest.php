@@ -34,7 +34,7 @@ class AuthDeleteCest
         $admin_pass = $config->get('admin_pass');
         $I->amOnPage('/index.php?mode=admin');
         $I->fillField('apass', $admin_pass);
-        $I->click('body > center > form > input[type="submit"]:nth-child(3)');
+        $I->click('body > div.center > form > input[type="submit"]:nth-child(4)');
     }
 
     /**
