@@ -16,7 +16,7 @@ $I->amOnPage('/index.php?mode=admin');
 $I->see('P-BBS');
 $I->see('管理モード', 'font');
 $I->fillField('apass', '0123');
-$I->click('body > center > form > input[type="submit"]:nth-child(3)');
+$I->click('body > div.center > form > input[type="submit"]:nth-child(4)');
 $I->see('管理モード', 'font');
 $I->seeInCurrentUrl('/index.php');
 

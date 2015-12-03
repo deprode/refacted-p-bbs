@@ -24,7 +24,7 @@ class ViewModel
 
         $tpl->mes = nl2br($mes);
 
-        $tpl->show('template/error.tpl.php');
+        $tpl->show('app/template/error.tpl.php');
     }
 
     /**
@@ -50,6 +50,25 @@ class ViewModel
     }
 
     /**
+     * 管理ログイン画面を表示する
+     * @param string $script_name スクリプト名
+     */
+    public function adminLogin($script_name)
+    {
+        $tpl = new Template();
+
+        $token = Security::generateToken();
+        $_SESSION['token'] = $token;
+
+        // 削除画面を表示
+        $tpl->c = $this->config;
+        $tpl->script_name = $script_name;
+        $tpl->token = $token;
+
+        $tpl->show('app/template/login.tpl.php');
+    }
+
+    /**
      * 管理画面を表示する
      * @param string $apass 管理用パスワード
      * @param string $script_name スクリプト名
@@ -62,35 +81,40 @@ class ViewModel
         $body = $this->config->get('body');
         $title1 = $this->config->get('title1');
 
-        // 削除モードのログを読み込み
-        $delmode = file($logfile);
-        $logs = [];
-        if (is_array($delmode)) {
-            foreach ($delmode as $l => $val) {
-                list($no, $date, $name, $email, $sub, $com, ,
-                    $host, , $time) = explode("<>", $val);
+        if (isset($apass)) {
+            // 削除モードのログを読み込み
+            $delmode = file($logfile);
+            $logs = [];
+            if (is_array($delmode)) {
+                foreach ($delmode as $l => $val) {
+                    list($no, $date, $name, $email, $sub, $com, ,
+                        $host, , $time) = explode("<>", $val);
 
-                list($date, $dmy) = split("\(", $date);
-                if ($email) {
-                    $name = "<a href=\"mailto:$email\">$name</a>";
+                    list($date, $dmy) = split("\(", $date);
+                    if ($email) {
+                        $name = "<a href=\"mailto:$email\">$name</a>";
+                    }
+                    $com = str_replace("<br>", "", $com);
+                    $com = htmlspecialchars($com);
+                    if (strlen($com) > 40) {
+                        $com = substr($com, 0, 38) . " ...";
+                    }
+
+                    $log = [];
+                    $log['no'] = $no;
+                    $log['date'] = $date;
+                    $log['sub'] = $sub;
+                    $log['name'] = $name;
+                    $log['com'] = $com;
+                    $log['host'] = $host;
+
+                    $logs[] = $log;
                 }
-                $com = str_replace("<br>", "", $com);
-                $com = htmlspecialchars($com);
-                if (strlen($com) > 40) {
-                    $com = substr($com, 0, 38) . " ...";
-                }
-
-                $log = [];
-                $log['no'] = $no;
-                $log['date'] = $date;
-                $log['sub'] = $sub;
-                $log['name'] = $name;
-                $log['com'] = $com;
-                $log['host'] = $host;
-
-                $logs[] = $log;
             }
         }
+
+        $token = Security::generateToken();
+        $_SESSION['token'] = $token;
 
         // 削除画面を表示
         $tpl->c = $this->config;
@@ -99,7 +123,9 @@ class ViewModel
         $tpl->apass = $apass;
 
         $tpl->delmode = $logs;
-        $tpl->show('template/admin.tpl.php');
+        $tpl->token = $token;
+
+        $tpl->show('app/template/admin.tpl.php');
     }
 
     /**
@@ -229,11 +255,15 @@ class ViewModel
             list($r_sub, $r_com) = $this->getResMsg($logfile, $no);
         }
 
+        $token = Security::generateToken();
+        $_SESSION['token'] = $token;
+
         $tpl->r_name = $r_name;
         $tpl->r_mail = $r_mail;
         $tpl->r_sub = $r_sub;
         $tpl->r_com = $r_com;
         $tpl->r_pass = $r_pass;
+        $tpl->token = $token;
 
         $page_def = $this->config->get('page_def');
         $view = file($logfile);
@@ -243,7 +273,7 @@ class ViewModel
         $tpl->start = (isset($page)) ? $page + 1 : 1;
         $tpl->total = count($view);
 
-        $tpl->show('template/index.tpl.php');
+        $tpl->show('app/template/index.tpl.php');
     }
 
     /**
@@ -278,6 +308,6 @@ class ViewModel
 
         $tpl->c = $this->config;
         $tpl->script_name = $script_name;
-        $tpl->show('template/past.tpl.php');
+        $tpl->show('app/template/past.tpl.php');
     }
 }

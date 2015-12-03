@@ -53,11 +53,15 @@ class Router
             case 'admin':
                 // *管理
                 $apass = $this->input->post('apass');
-                if ($this->main->adminAuth($apass)) {
-                    $this->main->adminDel();
-                    $this->main->vm->admin($apass, $script_name);
+                if (isset($apass)) {
+                    if ($this->main->adminAuth($apass)) {
+                        $this->main->adminDel();
+                        $this->main->vm->admin($apass, $script_name);
+                    } else {
+                        $this->main->vm->error('パスワードが違います');
+                    }
                 } else {
-                    $this->main->vm->error('パスワードが違います');
+                    $this->main->vm->adminLogin($script_name);
                 }
                 break;
             case 'usrdel':

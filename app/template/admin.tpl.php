@@ -32,6 +32,7 @@
         <p><center><h4>パスワードを入力して下さい</h4>
         <form action="<?php echo $script_name; ?>" method="POST">
             <input type="hidden" name="mode" value="admin">
+            <input type="hidden" name="token" value="<?php echo $token; ?>">
             <input type="password" name="apass" size="8">
             <input type="submit" value=" 認証 ">
         </form>
@@ -39,6 +40,7 @@
         <form action="<?php echo $script_name; ?>" method="POST">
         <input type="hidden" name="mode" value="admin">
         <input type="hidden" name="apass" value="<?php echo $apass; ?>">
+        <input type="hidden" name="token" value="<?php echo $token; ?>">
         <center><P>削除したい記事のチェックボックスにチェックを入れ、削除ボタンを押して下さい。
         <P><table border="0" cellspacing="0">
         <tr bgcolor="bbbbbb">
