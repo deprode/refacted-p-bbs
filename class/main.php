@@ -100,7 +100,7 @@ class Main
         $limit = 14 * 24 * 3600; /* 2週間で期限切れ */
 
         $cookvalue = implode(",", array($name, $email));
-        setcookie("p_bbs", $cookvalue, $now->format('U') + $limit);
+        setcookie("p_bbs", $cookvalue, $now->format('U') + $limit, '', '', false, true);
     }
 
     /**
