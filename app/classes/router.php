@@ -60,7 +60,8 @@ class Router
                 $admin_pass = $this->config->get('admin_pass');
                 if (isset($apass)) {
                     if (Security::adminAuth($admin_pass, $apass)) {
-                        $this->main->adminDel();
+                        $delete = new Delete($this->config, $this->input);
+                        $delete->delFromAdmin();
                         $this->main->vm->admin($apass, $script_name);
                     } else {
                         $this->main->vm->error('パスワードが違います');
@@ -72,7 +73,8 @@ class Router
             case 'usrdel':
                 // *ユーザー権限による書き込みの削除
                 try {
-                    $this->main->usrdel();
+                    $delete = new Delete($this->config, $this->input);
+                    $delete->delFromUser();
                 } catch (Exception $e) {
                     $this->main->vm->error($e->getMessage());
                 }
