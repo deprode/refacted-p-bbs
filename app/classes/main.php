@@ -74,22 +74,6 @@ class Main
     }
 
     /**
-     * ホスト名を取得する
-     * @return string アクセス元のホスト名
-     */
-    function getHost()
-    {
-        $host = $this->input->server('REMOTE_HOST');
-        $addr = $this->input->server('REMOTE_ADDR');
-        if ($host == "" || $host == $addr) {
-            //gethostbyddrが使えるか
-            $host = @gethostbyaddr($addr);
-        }
-
-        return $host;
-    }
-
-    /**
      * ユーザ名とメールアドレスをクッキーに保存する
      * @param string $name 名前
      * @param string $email Eメールアドレス
@@ -123,7 +107,7 @@ class Main
         $no = ($prev) ? $prev->no + 1 : 1;
 
         // ホスト名を取得
-        $host = $this->getHost();
+        $host = $this->input->host();
 
         // 削除キーを暗号化
         $PW = '';
