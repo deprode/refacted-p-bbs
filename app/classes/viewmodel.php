@@ -90,7 +90,7 @@ class ViewModel
                     list($no, $date, $name, $email, $sub, $com, ,
                         $host, , $time) = explode("<>", $val);
 
-                    list($date, $dmy) = split("\(", $date);
+                    list($date, ) = explode("(", $date);
                     if ($email) {
                         $name = "<a href=\"mailto:$email\">$name</a>";
                     }
