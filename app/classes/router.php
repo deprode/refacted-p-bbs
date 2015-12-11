@@ -14,7 +14,6 @@ class Router
     {
         $this->config = new Config();
         $this->input = new Input();
-        $this->main = new Main($this->config, $this->input);
         $this->view_model = new ViewModel($this->config);
     }
 
@@ -51,7 +50,7 @@ class Router
                     // *転送
                     header("Location: {$script_name}");
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
             case 'admin':
@@ -62,12 +61,12 @@ class Router
                     if (Security::adminAuth($admin_pass, $apass)) {
                         $delete = new Delete($this->config, $this->input);
                         $delete->delFromAdmin();
-                        $this->main->vm->admin($apass, $script_name);
+                        $this->view_model->admin($apass, $script_name);
                     } else {
-                        $this->main->vm->error('パスワードが違います');
+                        $this->view_model->error('パスワードが違います');
                     }
                 } else {
-                    $this->main->vm->adminLogin($script_name);
+                    $this->view_model->adminLogin($script_name);
                 }
                 break;
             case 'usrdel':
@@ -76,7 +75,7 @@ class Router
                     $delete = new Delete($this->config, $this->input);
                     $delete->delFromUser();
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
@@ -91,9 +90,9 @@ class Router
                 // 過去ログモード
                 $pno = $this->input->get('pno');
                 try {
-                    $this->main->vm->pastView($pno, $script_name);
+                    $this->view_model->pastView($pno, $script_name);
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
             default:
@@ -101,9 +100,9 @@ class Router
                 $page = $this->input->get('page');
                 $p_bbs = $this->input->cookie('p_bbs');
                 try {
-                    $this->main->vm->main($mode, $no, $page, $p_bbs, $script_name);
+                    $this->view_model->main($mode, $no, $page, $p_bbs, $script_name);
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
         }
