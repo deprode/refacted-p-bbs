@@ -8,12 +8,14 @@ class Router
     private $main;
     private $config;
     private $input;
+    private $view_model;
 
     public function __construct()
     {
         $this->config = new Config();
         $this->input = new Input();
         $this->main = new Main($this->config, $this->input);
+        $this->view_model = new ViewModel($this->config);
     }
 
     /**
@@ -42,7 +44,8 @@ class Router
                     $regist->registPost();
                     // トップページをHTMLに書き出す
                     if ($htmlw) {
-                        $this->main->MakeHtml();
+                        $filepath = $this->config->get('html_file');
+                        Html::makeHtml($this->view_model, $this->input, $script_name, $filepath);
                     }
 
                     // *転送
@@ -75,7 +78,8 @@ class Router
                 }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
-                    $this->main->MakeHtml();
+                    $filepath = $this->config->get('html_file');
+                    Html::makeHtml($this->view_model, $this->input, $script_name, $filepath);
                 }
 
                 // *転送

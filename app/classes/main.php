@@ -69,27 +69,4 @@ class Main
         // 削除処理
         Log::removePosts($logfile, $del);
     }
-
-    /**
-     * メイン表示をHtmlに書き出す
-     */
-    function MakeHtml()
-    {
-        $view_model = new ViewModel($this->config);
-        $html_file = $this->config->get('html_file');
-
-        // HTML生成
-        ob_start();
-        $view_model->main();
-        $buf = ob_get_contents();
-        ob_end_clean();
-
-        // バッファをHTMLファイルに書き込み
-        $handle = @fopen($html_file, "w");
-        flock($handle, LOCK_EX);
-        fputs($handle, $buf);
-        fflush($handle);
-        flock($handle, LOCK_UN);
-        fclose($handle);
-    }
 }
