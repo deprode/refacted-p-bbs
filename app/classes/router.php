@@ -21,7 +21,7 @@ class Router
      * ルーティングを行う
      * @param string $mode 分岐用クエリ文字列
      */
-    function index($mode)
+    public function index($mode)
     {
         $script_name = $this->input->server('SCRIPT_NAME');
         if (!$script_name) {
