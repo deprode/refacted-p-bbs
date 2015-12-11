@@ -304,21 +304,6 @@ class Main
     }
 
     /**
-     * 管理者パスワードを検証する
-     * @param stirng $password パスワード
-     * @return boolean パスワードが一致していたらtrue,一致していなければfalse
-     */
-    function adminAuth($password)
-    {
-        $admin_pass = $this->config->get('admin_pass');
-
-        if (isset($password) && $password != $admin_pass) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 管理者による投稿の削除を行う
      */
     function adminDel()

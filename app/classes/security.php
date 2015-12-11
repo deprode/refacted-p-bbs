@@ -72,4 +72,22 @@ class Security
         }
         return true;
     }
+
+    /**
+     * 管理者パスワードを検証する
+     * @param stirng $admin_password 管理用パスワード
+     * @param stirng $password パスワード
+     * @return boolean パスワードが一致していたらtrue,一致していなければfalse
+     */
+    public static function adminAuth($admin_pass, $password)
+    {
+        if (!isset($admin_pass)) {
+            // MEMO:管理パスワードを設定してなければ検証しない
+            return true;
+        }
+        if (isset($password) && $password != $admin_pass) {
+            return false;
+        }
+        return true;
+    }
 }

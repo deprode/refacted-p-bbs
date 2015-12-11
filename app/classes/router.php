@@ -53,8 +53,9 @@ class Router
             case 'admin':
                 // *管理
                 $apass = $this->input->post('apass');
+                $admin_pass = $this->config->get('admin_pass');
                 if (isset($apass)) {
-                    if ($this->main->adminAuth($apass)) {
+                    if (Security::adminAuth($admin_pass, $apass)) {
                         $this->main->adminDel();
                         $this->main->vm->admin($apass, $script_name);
                     } else {
