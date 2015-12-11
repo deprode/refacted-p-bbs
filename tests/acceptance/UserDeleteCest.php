@@ -38,6 +38,7 @@ class UserDeleteCest
         $I->fillField('pwd', $this->password);
         $I->click('body > div.right.cf > form > input[type="submit"]:nth-child(5)');
 
+        $I->see('P-BBS');
         $I->dontSeeElement('/html/body/span[1]');
     }
 }

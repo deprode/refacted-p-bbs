@@ -32,4 +32,21 @@ class Input
     {
         return (isset($_SESSION) && isset($_SESSION[$name])) ? $_SESSION[$name] : null;
     }
+
+    /**
+     * ホスト名を取得する
+     * @return string アクセス元のホスト名
+     */
+    public static function host()
+    {
+        $input = new Input();
+        $host = $input->server('REMOTE_HOST');
+        $addr = $input->server('REMOTE_ADDR');
+        if ($host == "" || $host == $addr) {
+            //gethostbyddrが使えるか
+            $host = @gethostbyaddr($addr);
+        }
+
+        return $host;
+    }
 }

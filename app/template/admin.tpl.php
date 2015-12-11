@@ -17,19 +17,26 @@
     margin: 0 auto;
     text-align: center;
 }
+.center table {
+    margin: 0 auto;
+}
+.full-width {
+    width: 100%;
+}
 </style>
 </head>
 <body <?php echo $c->body; ?>>
     [<a href="<?php echo $script_name; ?>">掲示板に戻る</a>]
-    <table width='100%'>
+    <table class="full-width">
         <tr>
             <th bgcolor="#508000">
                 <font color="#FFFFFF">管理モード</font>
             </th>
         </tr>
     </table>
+    <div class="center">
     <?php if(!isset($apass)): ?>
-        <p><center><h4>パスワードを入力して下さい</h4>
+        <h4>パスワードを入力して下さい</h4>
         <form action="<?php echo $script_name; ?>" method="POST">
             <input type="hidden" name="mode" value="admin">
             <input type="hidden" name="token" value="<?php echo $token; ?>">
@@ -38,21 +45,23 @@
         </form>
     <?php else: ?>
         <form action="<?php echo $script_name; ?>" method="POST">
-        <input type="hidden" name="mode" value="admin">
-        <input type="hidden" name="apass" value="<?php echo $apass; ?>">
-        <input type="hidden" name="token" value="<?php echo $token; ?>">
-        <center><P>削除したい記事のチェックボックスにチェックを入れ、削除ボタンを押して下さい。
-        <P><table border="0" cellspacing="0">
-        <tr bgcolor="bbbbbb">
-            <th>削除</th>
-            <th>記事No</th>
-            <th>投稿日</th>
-            <th>題名</th>
-            <th>投稿者</th>
-            <th>コメント</th>
-            <th>ホスト名</th>
-        </tr>
-        <?php foreach ($delmode as $l => $val): ?>
+            <input type="hidden" name="mode" value="admin">
+            <input type="hidden" name="apass" value="<?php echo $apass; ?>">
+            <input type="hidden" name="token" value="<?php echo $token; ?>">
+            <p>
+                削除したい記事のチェックボックスにチェックを入れ、削除ボタンを押して下さい。
+            </p>
+            <table border="0" cellspacing="0">
+                <tr bgcolor="bbbbbb">
+                    <th>削除</th>
+                    <th>記事No</th>
+                    <th>投稿日</th>
+                    <th>題名</th>
+                    <th>投稿者</th>
+                    <th>コメント</th>
+                    <th>ホスト名</th>
+                </tr>
+            <?php foreach ($delmode as $l => $val): ?>
                 <tr bgcolor=<?php echo ($l % 2) ? "F8F8F8" : "DDDDDD"; ?>>
                     <th>
                         <input type="checkbox" name="del[]" value="<?php echo $val['no']; ?>">
@@ -76,7 +85,7 @@
                         <?php echo $val['host']; ?>
                     </td>
                 </tr>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
             </table>
             <p>
                 <input type="submit" value="削除する">
@@ -84,6 +93,6 @@
             </p>
         </form>
     <?php endif; ?>
-    </center>
+    </div>
 </body>
 </html>

@@ -50,8 +50,8 @@ class AuthDeleteCest
         $I->see('管理モード', 'font');
 
         $I->checkOption('input[type="checkbox"][name="del[]"]');
-        $I->click('body > form > center > p:nth-child(4) > input[type="submit"]:nth-child(1)');
+        $I->click('body > div.center > form > p:nth-child(6) > input[type="submit"]:nth-child(1)');
 
-        $I->dontSeeElement('body > form > center > table > tbody > tr:nth-child(2)');
+        $I->dontSeeElement('body > div.center > form > table > tbody > tr:nth-child(2)');
     }
 }

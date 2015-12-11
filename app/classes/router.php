@@ -8,19 +8,20 @@ class Router
     private $main;
     private $config;
     private $input;
+    private $view_model;
 
     public function __construct()
     {
         $this->config = new Config();
         $this->input = new Input();
-        $this->main = new Main($this->config, $this->input);
+        $this->view_model = new ViewModel($this->config);
     }
 
     /**
      * ルーティングを行う
      * @param string $mode 分岐用クエリ文字列
      */
-    function index($mode)
+    public function index($mode)
     {
         $script_name = $this->input->server('SCRIPT_NAME');
         if (!$script_name) {
@@ -37,43 +38,49 @@ class Router
                 }
 
                 // *ログ書き込み
+                $regist = new Regist($this->config, $this->input);
                 try {
-                    $this->main->regist();
+                    $regist->registPost();
                     // トップページをHTMLに書き出す
                     if ($htmlw) {
-                        $this->main->MakeHtml();
+                        $filepath = $this->config->get('html_file');
+                        Html::makeHtml($this->view_model, $this->input, $script_name, $filepath);
                     }
 
                     // *転送
                     header("Location: {$script_name}");
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
             case 'admin':
                 // *管理
                 $apass = $this->input->post('apass');
+                $admin_pass = $this->config->get('admin_pass');
                 if (isset($apass)) {
-                    if ($this->main->adminAuth($apass)) {
-                        $this->main->adminDel();
-                        $this->main->vm->admin($apass, $script_name);
+                    if (Security::adminAuth($admin_pass, $apass)) {
+                        $delete = new Delete($this->config, $this->input);
+                        $delete->delFromAdmin();
+                        $this->view_model->admin($apass, $script_name);
                     } else {
-                        $this->main->vm->error('パスワードが違います');
+                        $this->view_model->error('パスワードが違います');
                     }
                 } else {
-                    $this->main->vm->adminLogin($script_name);
+                    $this->view_model->adminLogin($script_name);
                 }
                 break;
             case 'usrdel':
                 // *ユーザー権限による書き込みの削除
                 try {
-                    $this->main->usrdel();
+                    $delete = new Delete($this->config, $this->input);
+                    $delete->delFromUser();
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 // トップページをHTMLに書き出す
                 if ($htmlw) {
-                    $this->main->MakeHtml();
+                    $filepath = $this->config->get('html_file');
+                    Html::makeHtml($this->view_model, $this->input, $script_name, $filepath);
                 }
 
                 // *転送
@@ -83,9 +90,9 @@ class Router
                 // 過去ログモード
                 $pno = $this->input->get('pno');
                 try {
-                    $this->main->vm->pastView($pno, $script_name);
+                    $this->view_model->pastView($pno, $script_name);
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
             default:
@@ -93,9 +100,9 @@ class Router
                 $page = $this->input->get('page');
                 $p_bbs = $this->input->cookie('p_bbs');
                 try {
-                    $this->main->vm->main($mode, $no, $page, $p_bbs, $script_name);
+                    $this->view_model->main($mode, $no, $page, $p_bbs, $script_name);
                 } catch (Exception $e) {
-                    $this->main->vm->error($e->getMessage());
+                    $this->view_model->error($e->getMessage());
                 }
                 break;
         }
