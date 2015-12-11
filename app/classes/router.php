@@ -37,8 +37,9 @@ class Router
                 }
 
                 // *ログ書き込み
+                $regist = new Regist($this->config, $this->input);
                 try {
-                    $this->main->regist();
+                    $regist->registPost();
                     // トップページをHTMLに書き出す
                     if ($htmlw) {
                         $this->main->MakeHtml();
