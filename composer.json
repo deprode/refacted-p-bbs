@@ -8,7 +8,6 @@
     ],
     "require-dev": {
         "codeception/codeception": "*",
-        "codeception/specify": "^0.4.3",
-        "codeception/verify": "^0.3.0"
+        "psy/psysh": "@stable"
     }
 }

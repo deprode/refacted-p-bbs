@@ -1,10 +1,7 @@
 <?php
 
-
 class PostTest extends \Codeception\TestCase\Test
 {
-    use \Codeception\Specify;
-
     /**
      * @var \UnitTester
      */
@@ -24,21 +21,20 @@ class PostTest extends \Codeception\TestCase\Test
     public function testCreate()
     {
         $this->post = new Post();
+        $post = $this->post->post;
 
-        $this->specify("引数なしで生成するテスト", function() {
-            $post = $this->post->post;
-            verify(count($post))->equals(10);
-            verify($post['no'])->equals(0);
-            verify($post['date'])->equals('');
-            verify($post['name'])->equals('');
-            verify($post['email'])->equals(null);
-            verify($post['subject'])->equals(null);
-            verify($post['body'])->equals('');
-            verify($post['url'])->equals(null);
-            verify($post['host'])->equals(null);
-            verify($post['delpass'])->equals(null);
-            verify($post['unixtime'])->equals(null);
-        });
+        // 引数なしで生成するテスト
+        $this->assertEquals(count($post), 10);
+        $this->assertEquals($post['no'], 0);
+        $this->assertEquals($post['date'], '');
+        $this->assertEquals($post['name'], '');
+        $this->assertEquals($post['email'], null);
+        $this->assertEquals($post['subject'], null);
+        $this->assertEquals($post['body'], "");
+        $this->assertEquals($post['url'], null);
+        $this->assertEquals($post['host'], null);
+        $this->assertEquals($post['delpass'], null);
+        $this->assertEquals($post['unixtime'], null);
     }
 
     public function testBuild()
@@ -46,51 +42,46 @@ class PostTest extends \Codeception\TestCase\Test
         $data = '';
 
         $this->post = Post::buildPost($data);
-        $this->specify("空文字列", function() {
-            verify($this->post)->equals(null);
-        });
+        // 空文字列
+        $this->assertEquals($this->post, null);
 
+        // null
         $this->post = Post::buildPost(null);
-        $this->specify("null", function() {
-            verify($this->post)->equals(null);
-        });
+        $this->assertEquals($this->post, null);
 
-        $this->post = Post::buildPost("不正な文字列");
-        $this->specify("不正な文字列", function() {
-            verify($this->post)->equals(null);
-        });
+        // 不正な文字列
+        $this->post = Post::buildPost("");
+        $this->assertEquals($this->post, null);
 
+        // 正しい文字列
         $data = '1<>2015/12/11(Fri) 18:47<>名前<>example@example.com<>(無題)<>body<>http://example.com<>localhost<>$2y$10$i/QnUfHg90qOO67OtwyPoOQkvgNL.DjmHOUxM64/Np5Y1YUtaT496<>1449827263' . "\n";
         $this->post = Post::buildPost($data);
-        $this->specify("正しい文字列", function() {
-            $post = $this->post->post;
-            verify(count($post))->equals(10);
-            verify($post['no'])->equals(1);
-            verify($post['date'])->equals("2015/12/11(Fri) 18:47");
-            verify($post['name'])->equals("名前");
-            verify($post['email'])->equals("example@example.com");
-            verify($post['subject'])->equals("(無題)");
-            verify($post['body'])->equals('body');
-            verify($post['url'])->equals("http://example.com");
-            verify($post['host'])->equals("localhost");
-            verify($post['delpass'])->equals('$2y$10$i/QnUfHg90qOO67OtwyPoOQkvgNL.DjmHOUxM64/Np5Y1YUtaT496');
-            verify($post['unixtime'])->equals(1449827263);
-        });
+        $post = $this->post->post;
+        $this->assertEquals(count($post), 10);
+        $this->assertEquals($post['no'], 1);
+        $this->assertEquals($post['date'], "2015/12/11(Fri) 18:47");
+        $this->assertEquals($post['name'], "名前");
+        $this->assertEquals($post['email'], "example@example.com");
+        $this->assertEquals($post['subject'], "(無題)");
+        $this->assertEquals($post['body'], "body");
+        $this->assertEquals($post['url'], "http://example.com");
+        $this->assertEquals($post['host'], "localhost");
+        $this->assertEquals($post['delpass'], '$2y$10$i/QnUfHg90qOO67OtwyPoOQkvgNL.DjmHOUxM64/Np5Y1YUtaT496');
+        $this->assertEquals($post['unixtime'], 1449827263);
+
     }
 
     public function testPostStr()
     {
         $this->post = new Post();
-        $this->specify("初期値のPost", function() {
-            $string = $this->post->getPostStr();
-            verify($string)->equals("0<><><><><><><><><>0\n");
-        });
+        // 初期値のPost
+        $string = $this->post->getPostStr();
+        $this->assertEquals($string, "0<><><><><><><><><>0\n");
 
-        $this->specify("正しい文字列", function() {
-            $data = '1<>2015/12/11(Fri) 18:47<>名前<>example@example.com<>(無題)<>body<>http://example.com<>localhost<>$2y$10$i/QnUfHg90qOO67OtwyPoOQkvgNL.DjmHOUxM64/Np5Y1YUtaT496<>1449827263' . "\n";
-            $this->post = Post::buildPost($data);
-            $string = $this->post->getPostStr();
-            verify($string)->equals($data);
-        });
+        // 正しい文字列
+        $data = '1<>2015/12/11(Fri) 18:47<>名前<>example@example.com<>(無題)<>body<>http://example.com<>localhost<>$2y$10$i/QnUfHg90qOO67OtwyPoOQkvgNL.DjmHOUxM64/Np5Y1YUtaT496<>1449827263' . "\n";
+        $this->post = Post::buildPost($data);
+        $string = $this->post->getPostStr();
+        $this->assertEquals($string, $data);
     }
 }
