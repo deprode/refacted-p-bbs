@@ -30,13 +30,14 @@ class UserWriteCest
         $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
         $I->see('P-BBS');
-        $I->see('テスト', 'html/body/span[2]/b/a/text()');
-        $I->see('example@example.com', 'html/body/span[2]/b/a/@href');
+        $I->see('テスト', 'html/body/span[2]/b/a/.');
+        $I->seeInSource('<a href="mailto:example@example.com">テスト</a>');
+        $I->seeElement('html/body/span[2]/b/a');
         $I->see('テストタイトル', 'html/body/span[1]/b');
         $I->see('テスト
         これはテストです。', 'html/body/blockquote[1]/tt');
-        $I->see('http://example.com', 'html/body/blockquote[1]/p/a/@href');
-        $I->see('http://example.com', 'html/body/blockquote[1]/p/a/text()');
+        $I->seeElement('html/body/blockquote[1]/p/a');
+        $I->see('http://example.com', 'html/body/blockquote[1]/p/a/.');
     }
 
     public function writeEmptyTest(\AcceptanceTester $I)
@@ -71,6 +72,7 @@ class UserWriteCest
         $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
         $I->see('P-BBS');
+        $I->seeInCurrentUrl('/');
         $I->see('無題', 'html/body/span[1]/b');
     }
 
@@ -91,7 +93,7 @@ class UserWriteCest
         $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
         $I->see('エラー');
-        $I->see('二重投稿は禁止です', 'html/body/div/div/p/text()');
+        $I->see('二重投稿は禁止です', 'html/body/div/div/p/.');
     }
 
     public function writeConsecutiveTest (\AcceptanceTester $I)
@@ -111,7 +113,7 @@ class UserWriteCest
         $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
         $I->see('エラー');
-        $I->see('連続投稿はもうしばらく時間を置いてからお願い致します', 'html/body/div/div/p/text()');
+        $I->see('連続投稿はもうしばらく時間を置いてからお願い致します', 'html/body/div/div/p/.');
     }
 
     protected function makeMaxLine($max)
@@ -137,7 +139,7 @@ class UserWriteCest
         $I->click('body > form > tt > input[type="submit"]:nth-child(6)');
 
         $I->see('エラー');
-        $I->see('行数が長すぎますっ！', 'html/body/div/div/p/text()');
+        $I->see('行数が長すぎますっ！', 'html/body/div/div/p/.');
     }
 }
 

@@ -33,20 +33,20 @@ class Post
      */
     public function __construct($post = [])
     {
-        $this->post['no']       = $post['no']       ?: self::$post_default['no'];
-        $this->post['date']     = $post['date']     ?: self::$post_default['date'];
-        $this->post['name']     = $post['name']     ?: self::$post_default['name'];
-        $this->post['email']    = $post['email']    ?: self::$post_default['email'];
-        $this->post['subject']  = $post['subject']  ?: self::$post_default['subject'];
-        $this->post['body']     = $post['body']     ?: self::$post_default['body'];
-        $this->post['url']      = $post['url']      ?: self::$post_default['url'];
-        $this->post['host']     = $post['host']     ?: self::$post_default['host'];
-        $this->post['delpass']  = $post['delpass']  ?: self::$post_default['delpass'];
-        $this->post['unixtime'] = $post['unixtime'] ?: self::$post_default['unixtime'];
+        $this->post['no']       = isset($post['no'])       ? $post['no']       : self::$post_default['no'];
+        $this->post['date']     = isset($post['date'])     ? $post['date']     : self::$post_default['date'];
+        $this->post['name']     = isset($post['name'])     ? $post['name']     : self::$post_default['name'];
+        $this->post['email']    = isset($post['email'])    ? $post['email']    : self::$post_default['email'];
+        $this->post['subject']  = isset($post['subject'])  ? $post['subject']  : self::$post_default['subject'];
+        $this->post['body']     = isset($post['body'])     ? $post['body']     : self::$post_default['body'];
+        $this->post['url']      = isset($post['url'])      ? $post['url']      : self::$post_default['url'];
+        $this->post['host']     = isset($post['host'])     ? $post['host']     : self::$post_default['host'];
+        $this->post['delpass']  = isset($post['delpass'])  ? $post['delpass']  : self::$post_default['delpass'];
+        $this->post['unixtime'] = isset($post['unixtime']) ? $post['unixtime'] : self::$post_default['unixtime'];
     }
 
     /**
-     * セッター。キーに値がない場合、デフォルト値が設定される
+     * セッター
      * @param string $key
      * @param mixed $val
      */
@@ -74,9 +74,13 @@ class Post
      */
     public static function buildPost($data)
     {
-        if (!is_string($data)) {
+        if (!is_string($data) || mb_strlen($data) === 0) {
             return null;
         }
+        if (mb_substr_count($data, "<>") != 9) {
+            return null;
+        }
+        $data = trim($data);
 
         list($no, $date, $name, $email, $sub, $body, $url, $host, $password, $unixtime) = explode("<>", $data);
 

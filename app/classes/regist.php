@@ -30,7 +30,7 @@ class Regist
         /*
          * セキュリティ処理
          */
-        if (!Security::equalRequestMethod('POST')) {
+        if (!Security::equalRequestMethod($this->input, 'POST')) {
             throw new Exception("不正な投稿をしないで下さい");
         }
 

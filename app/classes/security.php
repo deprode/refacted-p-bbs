@@ -32,9 +32,8 @@ class Security
      * @param string $method 指定するメソッド（GET,POSTなど）
      * @param boolean 同一であればtrue、そうでなければfalse
      */
-    public static function equalRequestMethod($method)
+    public static function equalRequestMethod($input, $method)
     {
-        $input = new Input();
         $request = $input->server('REQUEST_METHOD');
         return $request === $method;
     }
@@ -85,7 +84,10 @@ class Security
             // MEMO:管理パスワードを設定してなければ検証しない
             return true;
         }
-        if (isset($password) && $password != $admin_pass) {
+        if (!isset($password)) {
+            return false;
+        }
+        if (isset($password) && $password !== $admin_pass) {
             return false;
         }
         return true;

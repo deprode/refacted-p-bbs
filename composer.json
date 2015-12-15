@@ -6,7 +6,8 @@
             "email": "sensitively+github@gmail.com"
         }
     ],
-    "require": {
-        "codeception/codeception": "*"
+    "require-dev": {
+        "codeception/codeception": "*",
+        "psy/psysh": "@stable"
     }
 }
