@@ -13,7 +13,7 @@ class Security
      * @return boolean ホストが一覧から見つかったらtrue,なければfalse
      */
     public static function existHost($remote_addr, $hosts = null) {
-        if (isset($hosts) || !is_array($hosts)) {
+        if (!isset($hosts) || !is_array($hosts)) {
             return false;
         }
 
@@ -29,8 +29,9 @@ class Security
 
     /**
      * リクエストメソッドが指定されたものと同一か調べる
+     * @param Input $input
      * @param string $method 指定するメソッド（GET,POSTなど）
-     * @param boolean 同一であればtrue、そうでなければfalse
+     * @return boolean 同一であればtrue、そうでなければfalse
      */
     public static function equalRequestMethod($input, $method)
     {
@@ -41,7 +42,7 @@ class Security
     /**
      * 外部から投稿されていないかチェック
      * 注：リファラは偽装される可能性があるのでこれだけでは不十分
-     * @return 外部から投稿されていればtrue,そうでなければfalse
+     * @return boolean 外部から投稿されていればtrue,そうでなければfalse
      */
     public static function checkReferrer()
     {
@@ -53,6 +54,7 @@ class Security
 
     /**
      * トークンを生成し取得する
+     * @return string
      */
     public static function generateToken()
     {
@@ -61,6 +63,8 @@ class Security
 
     /**
      * トークンのチェック
+     * @param string $token
+     * @return boolean
      */
     public static function checkToken($token)
     {
@@ -74,8 +78,8 @@ class Security
 
     /**
      * 管理者パスワードを検証する
-     * @param stirng $admin_password 管理用パスワード
-     * @param stirng $password パスワード
+     * @param string $admin_pass 管理用パスワード
+     * @param string $password パスワード
      * @return boolean パスワードが一致していたらtrue,一致していなければfalse
      */
     public static function adminAuth($admin_pass, $password)

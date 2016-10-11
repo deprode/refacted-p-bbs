@@ -3,14 +3,15 @@
 require_once 'template.php';
 
 /**
-* ViewModelクラス
-* Viewを表示させるためにデータのロード、形成、テンプレートの表示を行う
-*/
+ * ViewModelクラス
+ * Viewを表示させるためにデータのロード、形成、テンプレートの表示を行う
+ */
 class ViewModel
 {
     private $config;
 
-    public function __construct(Config $config) {
+    public function __construct(Config $config)
+    {
         $this->config = $config;
     }
 
@@ -90,7 +91,7 @@ class ViewModel
                     list($no, $date, $name, $email, $sub, $com, ,
                         $host, , $time) = explode("<>", $val);
 
-                    list($date, ) = explode("(", $date);
+                    list($date,) = explode("(", $date);
                     if ($email) {
                         $name = "<a href=\"mailto:$email\">$name</a>";
                     }
@@ -183,15 +184,15 @@ class ViewModel
             }
 
             $dat[] = [
-                'no' => $no,
-                'now' => $now,
-                'sub' => $sub,
+                'no'    => $no,
+                'now'   => $now,
+                'sub'   => $sub,
                 'email' => $email,
-                'name' => $name,
-                'now' => $now,
-                'com' => $com,
-                'url' => $url,
-                'host' => $host
+                'name'  => $name,
+                'now'   => $now,
+                'com'   => $com,
+                'url'   => $url,
+                'host'  => $host
             ];
         }
 
@@ -202,6 +203,8 @@ class ViewModel
      * 引用を返す
      * @param $logfile 掲示板の過去ログファイルのパス
      * @param $no 引用を行う投稿番号
+     * @return array 引用の配列[題名, 内容]
+     * @throws Exception
      */
     public function getResMsg($logfile, $no)
     {
@@ -280,6 +283,7 @@ class ViewModel
      * 過去ログを表示する
      * @param integer $pno 過去ログ番号（index$pno.html）
      * @param string $script_name スクリプト名
+     * @throws Exception
      */
     public function pastView($pno, $script_name)
     {

@@ -1,8 +1,8 @@
 <?php
 
 /**
-* 書き込みに関連する処理
-*/
+ * 書き込みに関連する処理
+ */
 class Regist
 {
 
@@ -96,7 +96,7 @@ class Regist
 
         //最大記事数処理
         $log_data = $old_log;
-        array_splice($log_data, $max-1);
+        array_splice($log_data, $max - 1);
         $new_log = array_merge($new_log, $log_data);
         Log::renewlog($logfile, $new_log); //ログ更新
     }

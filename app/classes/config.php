@@ -1,8 +1,8 @@
 <?php
 
 /**
-* 設定、設定ファイル読み込み
-*/
+ * 設定、設定ファイル読み込み
+ */
 class Config
 {
     // 設定情報
@@ -10,7 +10,7 @@ class Config
 
     /**
      * コンストラクタ
-     * @param $string filename 設定ファイル名（ファイルパス）
+     * @param string $filename 設定ファイル名（ファイルパス）
      */
     function __construct($filename = null)
     {
@@ -20,11 +20,12 @@ class Config
     /**
      * 設定情報の初期化
      * @param string $filename 設定ファイル名（ファイルパス）
+     * @throws Exception 設定ファイルが読み込めない
      */
     private static function initConfig($filename = null)
     {
         if (!isset($filename)) {
-            $settings = require __DIR__.'/../settings.php';
+            $settings = require __DIR__ . '/../settings.php';
             $filename = $settings['config']['path'];
         }
 
@@ -37,6 +38,7 @@ class Config
     /**
      * 設定の取得
      * @param string $key 設定のキー（iniファイルの）
+     * @return mixed
      */
     private static function _getConfig($key)
     {
@@ -49,6 +51,7 @@ class Config
     /**
      * 設定の取得（動的時）
      * @param string $key 設定のキー（iniファイルの）
+     * @return mixed
      */
     public function __get($key)
     {
@@ -58,6 +61,7 @@ class Config
     /**
      * 設定の取得（静的時）
      * @param string $key 設定のキー（iniファイルの）
+     * @return mixed
      */
     public static function get($key)
     {

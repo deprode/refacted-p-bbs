@@ -12,7 +12,7 @@ session_start();
 header('X-FRAME-OPTIONS: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 
-$settings = require __DIR__.'/app/settings.php';
+$settings = require __DIR__ . '/app/settings.php';
 $config_file_name = $settings['config']['path'];
 
 if (!is_readable($config_file_name)) {

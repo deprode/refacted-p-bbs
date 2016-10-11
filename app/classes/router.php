@@ -10,6 +10,9 @@ class Router
     private $input;
     private $view_model;
 
+    /**
+     * Router constructor.
+     */
     public function __construct()
     {
         $this->config = new Config();
@@ -20,6 +23,7 @@ class Router
     /**
      * ルーティングを行う
      * @param string $mode 分岐用クエリ文字列
+     * @throws Exception
      */
     public function index($mode)
     {

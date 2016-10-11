@@ -1,12 +1,16 @@
 <?php
 
 /**
-* HTML書き出しを行う
-*/
+ * HTML書き出しを行う
+ */
 class Html
 {
     /**
      * メイン表示をHtmlに書き出す
+     * @param ViewModel $view_model
+     * @param Input $input
+     * @param $script_name
+     * @param string $filepath
      */
     public static function makeHtml(ViewModel $view_model, Input $input, $script_name, $filepath = "pbbs.html")
     {
