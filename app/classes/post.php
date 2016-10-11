@@ -1,10 +1,10 @@
 <?php
 
 /**
-* 投稿内容を格納するクラス
-*
-* あらかじめ設定されたキーでのみ代入が可能。
-*/
+ * 投稿内容を格納するクラス
+ *
+ * あらかじめ設定されたキーでのみ代入が可能。
+ */
 class Post
 {
     /**
@@ -60,6 +60,7 @@ class Post
     /**
      * ゲッター
      * @param string $key
+     * @return mixed
      */
     public function __get($key)
     {
@@ -85,17 +86,17 @@ class Post
         list($no, $date, $name, $email, $sub, $body, $url, $host, $password, $unixtime) = explode("<>", $data);
 
         return new Post([
-                    'no'       => $no,
-                    'date'     => $date,
-                    'name'     => $name,
-                    'email'    => $email,
-                    'subject'  => $sub,
-                    'body'     => $body,
-                    'url'      => $url,
-                    'host'     => $host,
-                    'delpass'  => $password,
-                    'unixtime' => $unixtime
-                ]);
+            'no'       => $no,
+            'date'     => $date,
+            'name'     => $name,
+            'email'    => $email,
+            'subject'  => $sub,
+            'body'     => $body,
+            'url'      => $url,
+            'host'     => $host,
+            'delpass'  => $password,
+            'unixtime' => $unixtime
+        ]);
     }
 
     /**
@@ -105,16 +106,16 @@ class Post
     public function getPostStr()
     {
         return sprintf("%d<>%s<>%s<>%s<>%s<>%s<>%s<>%s<>%s<>%d\n",
-                        $this->post['no'],
-                        $this->post['date'],
-                        $this->post['name'],
-                        $this->post['email'],
-                        $this->post['subject'],
-                        $this->post['body'],
-                        $this->post['url'],
-                        $this->post['host'],
-                        $this->post['delpass'],
-                        $this->post['unixtime']);
+            $this->post['no'],
+            $this->post['date'],
+            $this->post['name'],
+            $this->post['email'],
+            $this->post['subject'],
+            $this->post['body'],
+            $this->post['url'],
+            $this->post['host'],
+            $this->post['delpass'],
+            $this->post['unixtime']);
     }
 
 }

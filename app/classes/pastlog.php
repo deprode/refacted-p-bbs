@@ -21,6 +21,7 @@ class Pastlog
      * 過去ログのインデックスを読み込む
      * @param string $filepath 過去ログのファイルパス
      * @return string インデックス
+     * @throws Exception
      */
     public static function readPastIndexLog($filepath)
     {

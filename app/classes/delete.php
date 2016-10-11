@@ -1,13 +1,18 @@
 <?php
 
 /**
-* ログの削除コントローラ
-*/
+ * ログの削除コントローラ
+ */
 class Delete
 {
     private $config;
     private $input;
 
+    /**
+     * Delete constructor.
+     * @param Config $config
+     * @param Input $input
+     */
     public function __construct(Config $config, Input $input)
     {
         $this->config = $config;
@@ -16,6 +21,7 @@ class Delete
 
     /**
      * ユーザーによる削除を行う
+     * @throws Exception
      */
     public function delFromUser()
     {
@@ -52,6 +58,7 @@ class Delete
 
     /**
      * 管理者による投稿の削除を行う
+     * @throws Exception
      */
     public function delFromAdmin()
     {

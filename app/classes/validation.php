@@ -6,19 +6,19 @@
 class Validation
 {
     private $white_arguments = [
-        "mode" => ["alpha"],
-        "page" => ["number"],
-        "pno"  => ["number"],
-        "name" => ["utf-8"],
-        "email" => ["email"],
-        "sub" => ["utf-8"],
-        "com" => ["utf-8"],     // 本文
-        "url" => ["url"],
+        "mode"     => ["alpha"],
+        "page"     => ["number"],
+        "pno"      => ["number"],
+        "name"     => ["utf-8"],
+        "email"    => ["email"],
+        "sub"      => ["utf-8"],
+        "com"      => ["utf-8"],     // 本文
+        "url"      => ["url"],
         "password" => ["alpha", "number"],
-        "no"   => ["number"],
-        "pwd" => ["alpha", "number"],
-        "apass" => ["utf-8"],
-        "del" => ["number"]
+        "no"       => ["number"],
+        "pwd"      => ["alpha", "number"],
+        "apass"    => ["utf-8"],
+        "del"      => ["number"]
     ];
 
     /**
@@ -36,11 +36,11 @@ class Validation
      * 文字列が空のときと、半角空白、全角空白、タブ、改行をチェックする
      * @param string $s 対象の文字列
      * @param string $multiline 複数行か（trueの時はタブ、改行をチェックしない）
-     * @param boolean 空の時はtrue
+     * @return boolean 空の時はtrue
      */
-    public static function isEmpty($s, $multiline = false)
+    public static function isEmpty($s, $multiline = '')
     {
-        if ($multiline) {
+        if (empty($multiline)) {
             return (empty($s) || preg_match("/^( |　|\t|\r|\n)*$/", $s));
         }
         return (empty($s) || preg_match("/^( |　)*$/", $s));
@@ -50,6 +50,7 @@ class Validation
      * 文字列が指定された長さを超えていないか調べる
      * @param string $s 文字列
      * @param integer $len 長さ
+     * @return boolean
      */
     public static function overLength($s, $len)
     {
@@ -60,6 +61,7 @@ class Validation
      * 文字列が指定された行数を超えていないか調べる
      * @param string $com 文字列
      * @param integer $maxline 最大行数
+     * @return boolean
      */
     public static function overMaxline($com, $maxline = 0)
     {
