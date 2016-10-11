@@ -24,8 +24,8 @@ class SecurityTest extends \Codeception\TestCase\Test
     // tests
     public function testHosts()
     {
-
-        $this->assertEquals(Security::existHost(), true);
+        $this->assertEquals(Security::existHost('192.168.11.1'), false);
+        $this->assertEquals(Security::existHost('192.168.11.1',['192.168.11.1']), true);
     }
 
     public function testRequestMethod()

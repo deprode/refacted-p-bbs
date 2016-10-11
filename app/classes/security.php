@@ -13,7 +13,7 @@ class Security
      * @return boolean ホストが一覧から見つかったらtrue,なければfalse
      */
     public static function existHost($remote_addr, $hosts = null) {
-        if (isset($hosts) || !is_array($hosts)) {
+        if (!isset($hosts) || !is_array($hosts)) {
             return false;
         }
 
