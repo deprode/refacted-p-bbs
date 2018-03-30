@@ -1,5 +1,5 @@
 # P-BBS
-[http://php.s3.to](http://php.s3.to)
+[http://php.loglog.jp/](http://php.loglog.jp/)
 Copyright(C) 1999-2015 ToR all rights reserved.
 
 ## 概要
